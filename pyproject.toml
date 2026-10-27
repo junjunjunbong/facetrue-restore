@@ -1,0 +1,17 @@
+[project]
+name = "facetrue-restore"
+version = "0.1.0"
+description = "Local reference-guided video restoration and controlled comparisons"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

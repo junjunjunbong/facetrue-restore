@@ -1,0 +1,4 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FaceTrue Restore</title>
+<style>body{background:#171918;color:#efece6;font:18px/1.65 system-ui;max-width:760px;margin:12vh auto;padding:24px}h1{font-size:48px;line-height:1.1}span{color:#c8ddac}p{color:#b8bdb6}code{color:#c8ddac}</style></head>
+<body><span>FACETRUE / RESTORE</span><h1>A face you remember.<br>A comparison you can inspect.</h1><p>Local video restoration with a separate reference photo.</p><p id="status">Checking app…</p><p>One person · Fixed framing · 4–10 seconds</p><script>fetch('/api/config').then(r=>r.json()).then(c=>document.querySelector('#status').textContent=c.mode==='mock'?c.mock_notice:'Comfy mode configured. GPU availability has not been checked.').catch(()=>document.querySelector('#status').textContent='App is unavailable.');</script></body></html>

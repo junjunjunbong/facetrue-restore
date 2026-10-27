@@ -1,0 +1,9 @@
+outputs/
+models/
+*.safetensors
+*.ckpt
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.env

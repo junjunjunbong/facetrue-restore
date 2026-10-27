@@ -82,7 +82,7 @@ def extract_previous_tail(restored: Path, output: Path, model_frames: int, fps: 
 
 
 def stitch_videos(videos: Sequence[Path], plan: Sequence[Chunk], output: Path,
-                   expected_frames: int, fps: int, ffmpeg: str = "ffmpeg") -> Path:
+                   expected_frames: int, fps: int, ffmpeg: str = "ffmpeg", ffprobe: str = "ffprobe") -> Path:
     """Trim padding and duplicate frames by index, then encode one continuous H.264 stream."""
     if len(videos) != len(plan) or list(plan) != plan_chunks(expected_frames):
         raise ValueError("Videos and plan do not match the expected length")
@@ -98,7 +98,7 @@ def stitch_videos(videos: Sequence[Path], plan: Sequence[Chunk], output: Path,
     command += ["-filter_complex", ";".join(filters), "-map", "[out]", "-an", "-r", str(fps),
                 "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(output)]
     _run(command)
-    actual = count_video_frames(output)
+    actual = count_video_frames(output, ffprobe)
     if actual != expected_frames:
         output.unlink(missing_ok=True)
         raise ValueError(f"Stitch produced {actual} frames; expected {expected_frames}")

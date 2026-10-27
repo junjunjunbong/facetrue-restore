@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     max_seconds: float = Field(default=10, gt=0, le=10)
     upload_limit_mb: int = Field(default=256, ge=1, le=2048)
     seed: int = Field(default=42, ge=0, le=2**32 - 1)
-    steps: int = Field(default=8, ge=1, le=50)
+    steps: int = Field(default=8, ge=8, le=8)
     job_timeout_seconds: int = Field(default=7200, ge=30, le=86400)
     ffmpeg: str = "ffmpeg"
     ffprobe: str = "ffprobe"

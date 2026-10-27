@@ -53,10 +53,14 @@ class ModelFiles:
     restore_lora: str = "ltx-2.5-22b-ic-lora-restore-1.0.safetensors"
 
     @classmethod
-    def from_env(cls) -> "ModelFiles":
+    def from_env(cls, env_file: Path | None = None) -> "ModelFiles":
+        from dotenv import dotenv_values
+
         defaults = cls()
+        env = dotenv_values(env_file or WORKFLOW_PATH.parent.parent / ".env")
         return cls(**{
-            field.name: os.environ.get(f"FACETRUE_{field.name.upper()}", getattr(defaults, field.name))
+            field.name: os.environ.get(f"FACETRUE_{field.name.upper()}")
+            or env.get(f"FACETRUE_{field.name.upper()}") or getattr(defaults, field.name)
             for field in fields(cls)
         })
 

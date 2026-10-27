@@ -25,6 +25,8 @@ def test_invalid_mode_and_dimensions_fail():
         Settings(_env_file=None, mode="cloud")
     with pytest.raises(ValidationError):
         Settings(_env_file=None, width=1279)
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, steps=12)
 
 
 async def test_mock_copies_without_inventing_photo_effect(tmp_path):

@@ -38,3 +38,11 @@ class MockBackend:
         request.output.parent.mkdir(parents=True, exist_ok=True)
         await asyncio.to_thread(shutil.copyfile, request.video, request.output)
         return request.output
+
+
+def get_backend(settings) -> RestoreBackend:
+    if settings.mode == "mock":
+        return MockBackend()
+    from app.comfy_backend import ComfyBackend
+
+    return ComfyBackend(settings)

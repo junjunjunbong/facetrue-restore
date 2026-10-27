@@ -1,0 +1,3 @@
+# Official Comfy-Org releases; install only for the real GPU backend.
+comfy-sdk==0.5.0
+comfy-api-proxy==0.1.6

@@ -51,7 +51,7 @@ The correct and wrong photo normally must each contain exactly one detectable fa
 The app never downloads an evaluation model during import, upload, or scoring. The following command downloads the two official OpenCV Zoo ONNX files and their license texts, then checks pinned SHA256 hashes. Model weights remain outside git.
 
 ```bash
-python scripts/download_eval_models.py
+.venv/bin/python scripts/download_eval_models.py
 ```
 
 | File | Bytes | SHA256 |
@@ -66,14 +66,14 @@ Hashes and sizes were read from the upstream Git LFS pointer files. A Git LFS po
 Configure the real Comfy connection and required restoration weights first. Mock mode is refused. The output directory must be empty so a new experiment cannot overwrite earlier evidence.
 
 ```bash
-FACETRUE_MODE=comfy python scripts/evaluate.py data/evaluation/pilot.json \
+FACETRUE_MODE=comfy .venv/bin/python scripts/evaluate.py data/evaluation/pilot.json \
   --output data/evaluation/run-001
 ```
 
 For one 49- or 97-frame direct hardware preflight:
 
 ```bash
-FACETRUE_MODE=comfy python scripts/evaluate.py data/evaluation/pilot.json \
+FACETRUE_MODE=comfy .venv/bin/python scripts/evaluate.py data/evaluation/pilot.json \
   --output data/evaluation/preflight-001 --direct
 ```
 

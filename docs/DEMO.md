@@ -43,7 +43,7 @@ These are local files and are not committed. They were generated from `data/eval
 | Clip | File | Length | Content |
 |---|---|---|---|
 | Wipe | `data/eval-pd/demo/biden_wipe.mp4` | 12.1 s (97 frames × 3 loops), 1920×1080, 24 fps | Face-zoomed. Left "Without photo", right "With real photo". A divider sweeps across. Caption: "Same damaged VHS-style input · same seed · only the reference photo differs". |
-| 4-panel | `data/eval-pd/demo/biden_4panel.mp4` | 8.1 s (97 frames × 2 loops), 1920×1080, 24 fps | Damaged input / Without photo / With real photo / Original. **The burned-in title still reads "one reference photo keeps the face true".** Re-render it with the toned-down title before using it (see checklist). |
+| 4-panel | `data/eval-pd/demo/biden_4panel.mp4` | 8.1 s (97 frames × 2 loops), 1920×1080, 24 fps | Damaged input / Without photo / With real photo / Original. Title: "FaceTrue Restore: a reference photo helps the face look more like the real person". Subtitle: "Synthetic VHS-style damage on public-domain footage · LTX-2.5 + Restore IC-LoRA · same seed · small test (3 clips, 1 seed)". |
 
 The video loops back at 4.04 s and 8.08 s, which causes a small jump. Cut on the loop point or play only one pass when time is short.
 
@@ -54,10 +54,10 @@ VO = voiceover. On-screen text is in quotes. Times are cumulative.
 | Time | On screen | VO / caption (English) |
 |---|---|---|
 | **0:00-0:12** Hook | **Wipe clip** at full screen, first pass, with the divider sweeping. Small corner caption: "Synthetic VHS-style damage · public-domain footage". | "Same damaged video, restored twice on my own PC. Same model, same seed. The only difference: on the right, I gave it one real photo of the person." |
-| **0:12-0:24** Problem | **4-panel clip** (re-rendered title): damaged / without photo / with real photo / original. Hold on it once it reaches the "Original" panel. | "Old tape loses the face. A restoration model fills in the missing detail, but it has to guess whose face it is. FaceTrue Restore lets you hand it a separate photo, and shows you exactly what that photo changed." |
+| **0:12-0:24** Problem | **4-panel clip**: damaged / without photo / with real photo / original. Hold on it once it reaches the "Original" panel. | "Old tape loses the face. A restoration model fills in the missing detail, but it has to guess whose face it is. FaceTrue Restore lets you hand it a separate photo, and shows you exactly what that photo changed." |
 | **0:24-0:36** Upload | Web UI screen capture: upload the clip, tick "synthetic test clip", show the first frame. | "You start with a short clip of one person. The app can deinterlace it and normalizes size and frame rate." |
 | **0:36-0:50** Face + photo | Click the face in the first frame. Drop the separate portrait. Show the crop preview, then the gray reference canvas with the face placed at the clicked position. | "Click the face, drop in a separate photo, not a frame from the video. The app places that face on a reference canvas, at the same spot as the face in the video." |
-| **0:50-1:04** Run + 3-way player | Start the job (sped up, with an on-screen "sped up" label). Then the synchronized player: original / without photo / with photo. Scrub, and pause on one frame. | "It renders the clip twice, with and without the photo, using the same seed. All three views stay on the same frame, so you can compare them directly." Caption: "Sped up. Real render: about a minute per 97-frame pass on one RTX 5090." |
+| **0:50-1:04** Run + 3-way player | Start the job (sped up, with an on-screen "sped up" label). Then the synchronized player: original / without photo / with photo. Scrub, and pause on one frame. | "It renders the clip twice, with and without the photo, using the same seed. All three views stay on the same frame, so you can compare them directly." Caption: "Sped up. Real render: about 72 s per 97-frame window on one RTX 5090." |
 | **1:04-1:24** Results | Results table card with the three clips and the correct − no photo / correct − other photo columns (numbers from the table above). Note under the card: "3 clips · 1 seed · synthetic damage". | "We tested it on three public-domain clips with heavy synthetic damage, against a no-photo run and a wrong-person photo. With the right photo, the face matched the real person more closely in all three, clearly for two of them and only slightly for the third. With mild damage, the effect was small. This is a small test, not a benchmark." |
 | **1:24-1:34** Honest limits | Pause the wipe on a frame where the background differs (the flag vs. the dark wall). | "It's generative. The background and color can change too, and similarity is not proof the original was recovered. That's why the app always shows the comparison." |
 | **1:34-1:50** How it works | Simple diagram: Mac (web app + FastAPI) → comfy-sdk → local proxy → ComfyUI on the RTX 5090 PC → LTX-2.5 22B + Restore IC-LoRA. Then: reference canvas, plus 97-frame windows with 17-frame overlap. Badge: "Open weights only". | "Under the hood: LTX-2.5 22B with the Restore IC-LoRA, running in ComfyUI on a single RTX 5090. The photo enters as a reference canvas. Longer clips are restored in 97-frame windows with a 17-frame overlap. Open weights only: no closed APIs, no partner nodes." |
@@ -65,7 +65,7 @@ VO = voiceover. On-screen text is in quotes. Times are cumulative.
 
 ### Notes on timing and wording
 
-- **Render time:** in the strong-damage pilot, 9 renders of 97 frames took 662 s in total, about 74 s each including loading. Peak GPU memory was about 31.9 GB, from `nvidia-smi` sampling for the whole GPU, with ComfyUI running in `--lowvram`. Use "about a minute per 97-frame pass", or leave the number out.
+- **Render time:** the app's render records show about 72 s per 97-frame window (8 steps, 1280×736). The 240-frame preflight (both arms, 3 windows each, plus export) took 482 s, about 8 min. In the strong-damage pilot, 9 renders of 97 frames took 662 s in total. Peak GPU memory was about 31.9-32.1 GB across the pilot runs, from `nvidia-smi` sampling for the whole GPU, with ComfyUI running in `--lowvram`. GPU-PC system RAM was not measured.
 - **Window chaining:** the finished Biden clips are a single 97-frame window. The separate 240-frame (10 s) pilot ran through the 97/17 window chaining. Do not show a chained clip as if it were the Biden demo.
 - **If a family-video example is added:** it must be public domain, or 준원's own footage used with the consent of everyone shown. Do not use private family media without consent. Do not upload private media to outside services.
 
@@ -73,7 +73,7 @@ VO = voiceover. On-screen text is in quotes. Times are cumulative.
 
 Checklist for 준원:
 
-- [ ] **Re-render the 4-panel clip** with a toned-down title, for example "FaceTrue Restore: does one real photo help?", or with no title. The current file says "keeps the face true".
+- [x] **Re-render the 4-panel clip** with the toned-down title "a reference photo helps the face look more like the real person" (done 2026-10-29).
 - [ ] **Web UI, upload (0:24-0:36):** upload `biden-hq`-derived degraded input or another public-domain clip. Tick the synthetic-test checkbox, and keep the "SYNTHETICALLY DEGRADED TEST CLIP" label visible.
 - [ ] **Web UI, face click and photo drop (0:36-0:50):** click the face, drop `biden-photo.jpg`, show the crop preview and the gray reference canvas.
 - [ ] **Web UI, run and 3-way player (0:50-1:04):** a real `FACETRUE_MODE=comfy` run, not mock output. Sped-up footage needs a "sped up" label. Scrub the synchronized player and pause on one frame.

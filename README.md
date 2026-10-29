@@ -4,7 +4,7 @@
 
 The goal is to make the photo's effect inspectable. A reference photo does not guarantee that a generated face is more accurate. Colors and fine details are reconstructed by a generative model.
 
-> **Comparison GIF placeholder:** add a short, labeled excerpt from an actual GPU run after validation. No restoration result or identity-improvement claim is published here yet.
+> **Comparison GIF placeholder:** add a short, labeled excerpt from the actual GPU run described in [Pilot results](#pilot-results-small-test).
 
 Built for the [Comfy Open Source Higgsfield challenge](https://comfy.org/open-source-higgsfield/), targeting Open Weights Only and the LTX VFX bonus. The app workflow uses local models and excludes partner/API generation nodes. [Workflow provenance](workflows/PROVENANCE.md).
 
@@ -20,7 +20,13 @@ Built for the [Comfy Open Source Higgsfield challenge](https://comfy.org/open-so
 | Offline mock | Exercises upload, selection, job execution, comparison and downloads without a GPU. Mock arms copy the input and carry a visible notice. |
 | Paired evaluation | Deliberately degrade HQ footage, run no-photo / correct-photo / wrong-photo conditions, and report local face-embedding diagnostics with detection failures and coverage. |
 
-**Validation status:** CPU/mock tests exercise the app and media pipeline. A successful LTX run, RTX 5090 peak memory, render speed, and identity improvement have **not been measured for this project**. Run the [GPU preflight](docs/GPU_PREFLIGHT.md) before presenting model results.
+**Validation status:** CPU/mock tests exercise the app and media pipeline. On one RTX 5090 (32GB, ComfyUI `--lowvram`), 49-, 97- and 240-frame jobs completed in comfy mode with the expected frame counts. Measured so far:
+
+- **Speed:** about 72 s per 97-frame window, at 8 steps and 1280×736 (from the app's render records). A 240-frame (10 s) clip with both arms, 3 windows each, plus export took 482 s (about 8 min) end to end.
+- **GPU memory:** the sampled whole-device peak was about 31.9-32.1 GB across the pilot runs (`nvidia-smi` polling). This is not an exact model allocation. GPU-PC system RAM was not measured.
+- **Photo effect:** see [Pilot results](#pilot-results-small-test). It is a small test with synthetic damage and one seed, not a benchmark.
+
+Run the [GPU preflight](docs/GPU_PREFLIGHT.md) on your own hardware before relying on these numbers.
 
 MVP scope: one person, preferably 4-10 seconds, with little camera or face movement. Face tracking, reference relocation between windows, multiple people, and clips beyond ten seconds are not implemented.
 
@@ -89,7 +95,7 @@ On a two-machine setup, `COMFYUI_URL=http://127.0.0.1:8188` would address the Ma
 
 ### Model defaults
 
-The real graph uses an INT8 ConvRot LTX-2.5 distilled transformer, an INT8 ConvRot Gemma 4 text encoder, a Conv video VAE and the Restore IC-LoRA. It uses 8 distilled steps, CFG 1, and 960×544 spatial tiles. The default app canvas is **1280×736**, padded to model-compatible dimensions; it is not an exact 1280×720 encode. A 32GB fit is a target configuration, not a measured guarantee. [Upstream lower-VRAM guidance](https://docs.ltx.io/open-source-model/integration-tools/comfy-ui#lower-vram-model-files).
+The real graph uses an INT8 ConvRot LTX-2.5 distilled transformer, an INT8 ConvRot Gemma 4 text encoder, a Conv video VAE and the Restore IC-LoRA. It uses 8 distilled steps, CFG 1, and 960×544 spatial tiles. The default app canvas is **1280×736**, padded to model-compatible dimensions; it is not an exact 1280×720 encode. On the tested RTX 5090 with ComfyUI `--lowvram` it ran at a sampled whole-device peak of about 31.9-32.1 GB. Other setups are not guaranteed to fit. [Upstream lower-VRAM guidance](https://docs.ltx.io/open-source-model/integration-tools/comfy-ui#lower-vram-model-files).
 
 Keep `FACETRUE_STEPS=8`. The current workflow rejects other step counts instead of inventing a distilled schedule. Photo-guide streaming is disabled. The app controls temporal chunking explicitly.
 
@@ -121,6 +127,27 @@ FACETRUE_MODE=comfy .venv/bin/python scripts/evaluate.py data/evaluation/pilot.j
 
 The optional model download is explicit and hash-checked. Evaluation refuses mock output. `summary.csv`, `frames.csv`, and `run.json` retain paired deltas, missing detections, source hashes, settings and output provenance. A high similarity score alone does not prove faithful reconstruction.
 
+### Pilot results (small test)
+
+- **Material:** three public-domain White House clips (Barack Obama, Joe Biden, Michelle Obama). Each has a separate official portrait as the correct photo and a different person's portrait as the control. Sources are listed in [docs/DEMO.md](docs/DEMO.md#sources-and-licenses).
+- **Settings:** seed 42, 97 frames, 8 steps.
+- **Score:** SFace cosine against the clean original, on 13 sampled frames per clip. A face was detected in every sampled frame of every condition.
+- **Damage was synthetic and heavy:** downscale to 1/5, blur, faded color, chroma shift, grain, H.264 CRF 36. It was applied by a local wrapper around `scripts/evaluate.py`; the repository default is milder.
+
+| Clip | Damaged vs. original | No photo | Correct photo | Other person's photo | Correct − no photo | Correct − other | Frames won (vs. no photo / vs. other) |
+|---|---|---|---|---|---|---|---|
+| Obama | 0.680 | 0.728 | 0.861 | 0.694 | +0.133 | +0.167 | 13/13, 13/13 |
+| Biden | 0.692 | 0.652 | 0.762 | 0.654 | +0.111 | +0.108 | 13/13, 13/13 |
+| Michelle Obama | 0.608 | 0.773 | 0.804 | 0.783 | +0.031 | +0.020 | 12/13, 12/13 |
+
+**What this does and does not show:**
+
+- **Heavy damage:** in this small test, adding the correct photo helped the restored face look more like the real person, clearly for two clips and slightly for the third.
+- **Mild damage:** with the repository's default damage, the damaged input was already about 0.87-0.89 similar to the original. There the effect was small and mixed: at 240 frames, correct − no photo was +0.014, +0.005 and −0.003.
+- **Limits:** this is three clips and one seed. The result does not establish a general improvement.
+- **Side effects:** the photo can also change the background (in the Biden pair, a flag became a dark wall) and color or sharpness.
+- **Not proof of recovery:** a higher similarity score can partly mean the result looks more like the reference photo itself.
+
 ## Models and licenses
 
 | Component | Role | Published terms / status |
@@ -150,7 +177,7 @@ For an optional browser smoke, install `playwright==1.55.0` in a development env
 
 Media, outputs, model weights, `.env`, caches and local evaluation records are gitignored. The app keeps uploaded media and job files in `FACETRUE_DATA_DIR` (default `data/`); remove local job data when no longer needed. No private family media is included in the repository.
 
-Generative output may change identity, expression, age, color or objects. Fixed reference placement can become wrong as a person moves. Chunk boundaries can flicker. The app checks frame accounting, but visual seam quality and reference effectiveness still require real GPU evaluation.
+Generative output may change identity, expression, age, color or objects. Fixed reference placement can become wrong as a person moves. Chunk boundaries can flicker. The app checks frame accounting, but visual seam quality still needs inspection on your own footage. The photo's effect has only been measured in the small pilot above.
 
 [Development plan](docs/PLAN.md) · [GPU preflight](docs/GPU_PREFLIGHT.md) · [Evaluation](docs/EVALUATION.md) · [Demo plan](docs/DEMO.md) · [Sample provenance](samples/README.md)
 

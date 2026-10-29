@@ -112,7 +112,7 @@ The app's MIT license does not relicense third-party model weights.
 | Model | Official distribution terms | Verification limits |
 |---|---|---|
 | YuNet 2023mar | MIT; model-directory README applies it to all files | This records upstream's published license, not an independent audit of training data |
-| SFace 2021dec | Apache-2.0; model-directory README applies it to all files | Exact training-data provenance: **확인 필요**; upstream questions #313/#318 remain open |
+| SFace 2021dec | Apache-2.0; model-directory README applies it to all files | Exact training-data provenance: **unverified**; upstream questions #313/#318 remain open |
 
 As checked on 2026-10-27, SFace's official README names the contributor and ONNX converter and states that all files in that directory are Apache-2.0. In #318, ShiqiYu referred the requested commercial usage to Apache 2. Follow-up questions about the exact checkpoint's training data remained unanswered in the inspected discussion. This project does not claim complete commercial rights clearance beyond the published upstream terms.
 

@@ -67,11 +67,11 @@ VO = voiceover. On-screen text is in quotes. Times are cumulative.
 
 - **Render time:** the app's render records show about 72 s per 97-frame window (8 steps, 1280×736). The 240-frame preflight (both arms, 3 windows each, plus export) took 482 s, about 8 min. In the strong-damage pilot, 9 renders of 97 frames took 662 s in total. Peak GPU memory was about 31.9-32.1 GB across the pilot runs, from `nvidia-smi` sampling for the whole GPU, with ComfyUI running in `--lowvram`. GPU-PC system RAM was not measured.
 - **Window chaining:** the finished Biden clips are a single 97-frame window. The separate 240-frame (10 s) pilot ran through the 97/17 window chaining. Do not show a chained clip as if it were the Biden demo.
-- **If a family-video example is added:** it must be public domain, or 준원's own footage used with the consent of everyone shown. Do not use private family media without consent. Do not upload private media to outside services.
+- **If a family-video example is added:** it must be public domain, or the project owner's own footage used with the consent of everyone shown. Do not use private family media without consent. Do not upload private media to outside services.
 
 ## Shots still to record
 
-Checklist for 준원:
+Checklist for the project owner:
 
 - [x] **Re-render the 4-panel clip** with the toned-down title "a reference photo helps the face look more like the real person" (done 2026-10-29).
 - [ ] **Web UI, upload (0:24-0:36):** upload `biden-hq`-derived degraded input or another public-domain clip. Tick the synthetic-test checkbox, and keep the "SYNTHETICALLY DEGRADED TEST CLIP" label visible.
@@ -118,7 +118,7 @@ The [Prelinger home-movie file](https://commons.wikimedia.org/wiki/File:Home_Mov
 
 The [official challenge page](https://comfy.org/open-source-higgsfield/) gives the deadline as October 30, 2026 at 09:00 PT, which is **October 31 at 01:00 KST**. The project's internal target is **October 30 at 22:00 KST**. Open Weights Only excludes partner nodes and closed APIs. The LTX VFX bonus requires LTX as the core video model.
 
-The owner (준원) performs these steps personally. This document does not publish a post, upload media, submit the form or change repository visibility.
+The project owner performs these steps personally. This document does not publish a post, upload media, submit the form or change repository visibility.
 
 - Public repository with the app license, installation instructions, upstream notices and actual limitations.
 - The demo video, no longer than two minutes, with a verified URL.

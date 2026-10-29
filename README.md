@@ -157,7 +157,7 @@ The optional model download is explicit and hash-checked. Evaluation refuses moc
 | LTX-2.5 Conv video VAE | Video encode/decode | LTX-2.x distribution terms |
 | Gemma 4 12B text encoder with LTX projections, Comfy INT8 (`Lightricks/LTX-2.5`, `text_encoders/gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors`) | Local text conditioning | Distributed by Lightricks under the [LTX-2.x Community License](https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x) ([model card](https://huggingface.co/Lightricks/LTX-2.5)); the Google Gemma 4 12B base model is [Apache-2.0](https://ai.google.dev/gemma/docs/gemma_4_license) ([model card](https://huggingface.co/google/gemma-4-12B-it)) |
 | OpenCV Haar cascade | UI face proposals | Intel Open Source Computer Vision Library license in the classifier file |
-| YuNet + SFace, optional | Evaluation detection and embeddings | YuNet MIT; SFace officially distributed Apache-2.0, exact training-data provenance **확인 필요** |
+| YuNet + SFace, optional | Evaluation detection and embeddings | YuNet MIT; SFace officially distributed Apache-2.0, exact training-data provenance **unverified** |
 
 The INT8 Gemma 4 text encoder used here is Lightricks' customized package with LTX projections, so we treat it as governed by the LTX-2.x Community License rather than relabeling it Apache-2.0; Google's original Gemma 4 weights are Apache-2.0. Weights are downloaded locally from Hugging Face after a click-through access form; no hosted API is used.
 

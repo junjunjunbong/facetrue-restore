@@ -1,79 +1,79 @@
-# FaceTrue Restore 계획
+# FaceTrue Restore Plan
 
-## 구현 상태
+## Implementation status
 
-앱·CLI·비교 내보내기·평가 도구·설치 및 데모 문서의 구현을 완료했다. 아래 MVP 체크는 코드와 CPU/mock 검증을 뜻한다. 실제 LTX 복원, RTX 5090 메모리·속도, 사진에 따른 닮음 향상은 아직 검증하지 않았다. [검증 기록](VALIDATION.md)과 [GPU 검증 순서](GPU_PREFLIGHT.md)를 따른다.
+The app, CLI, comparison export, evaluation tools, and install and demo docs are implemented. The MVP checks below mean code plus CPU/mock verification. Real LTX restoration, RTX 5090 memory and speed, and the likeness gain from a photo were not yet verified at that point. Follow the [validation log](VALIDATION.md) and the [GPU preflight steps](GPU_PREFLIGHT.md).
 
-## 한 줄 아이디어
-옛날 가족 영상(VHS·8mm, 흑백 가능)과 그 사람의 별도 실제 사진을 넣으면, 내 PC에서 오픈 웨이트로 복원하면서 얼굴이 사진 속 그 사람으로 유지되는 HD 영상이 나온다.
+## One-line idea
+Give it an old family video (VHS or 8mm, black-and-white is fine) plus a separate real photo of the person, and it restores the video to HD on your own PC with open weights while keeping the face true to the person in the photo.
 
-## 대회 정보
-- 마감: 2026-10-31 01:00 KST. 목표 제출: 10/30 22:00 KST.
-- 노리는 상: Open Weights Only(RTX 5090), LTX VFX 보너스($2,000, LTX가 핵심 모델이어야 함)
-- 제출폼: https://form.typeform.com/to/V1dSQrkS
-- 레포는 지금 프라이빗. 제출 직전에 public 전환.
+## Challenge info
+- Deadline: 2026-10-31 01:00 KST. Target submission: 10/30 22:00 KST.
+- Prizes targeted: Open Weights Only (RTX 5090), LTX VFX bonus ($2,000; LTX must be the core model)
+- Submission form: https://form.typeform.com/to/V1dSQrkS
+- The repo is private for now. Switch to public right before submission.
 
-## 기능
+## Features
 ### MVP
-- [x] 3분할 비교(핵심 차별점): 원본 / 사진 없이 복원 / 사진 넣고 복원, 같은 프레임 기준
-- [x] 얼굴 클릭 + 사진 드롭 → 참조 캔버스 자동 생성(출력 크기 회색 캔버스, 얼굴 위치에 붙임, frame_idx -1)
-- [x] 자동 분할·이어 붙이기(97프레임 창, 17프레임 겹침)
-- [x] 디인터레이스
-- [x] 시대별 positive/negative prompt 프리셋(기본 CFG 1에서는 negative conditioning 미적용)
-- [x] 와이프 비교 MP4 내보내기
-- MVP 제한: 한 사람, 4-10초 클립, 고정 구도 먼저
+- [x] Three-way comparison (the core differentiator): original / restored without photo / restored with photo, on the same frames
+- [x] Click a face + drop a photo → reference canvas built automatically (gray canvas at output size, face pasted at the face position, frame_idx -1)
+- [x] Automatic split and stitch (97-frame windows, 17-frame overlap)
+- [x] Deinterlacing
+- [x] Era-specific positive/negative prompt presets (negative conditioning is not applied at the default CFG 1)
+- [x] Wipe-comparison MP4 export
+- MVP limits: one person, 4-10 s clips, fixed framing first
 
-### 나중에
-- [ ] 얼굴이 움직일 때 구간마다 참조 위치 다시 배치(얼굴 추적)
-- [ ] 여러 사람, 더 긴 클립
-- [ ] 연결부 검토 화면
+### Later
+- [ ] Re-place the reference per window when the face moves (face tracking)
+- [ ] Multiple people, longer clips
+- [ ] Seam review screen
 
-## 구조
-- 5090 PC(32GB): ComfyUI(8188) ← comfy-api-proxy(127.0.0.1:8189) ← comfy-sdk
-- 앱: FastAPI + 얇은 웹 UI, FFmpeg/OpenCV(디인터레이스, 분할, 이어 붙이기, 비교 영상)
-- 모델: LTX-2.5 22B + Restore IC-LoRA. 카드 설정: 8 steps, CFG 1, 960x544 타일, 97프레임 창 / 17프레임 겹침
-- 저VRAM: INT8 transformer + INT8 Gemma + offload, RAM 64GB 이상 권장
-- 참조 경로는 use_streaming off 필요
+## Architecture
+- 5090 PC (32 GB): ComfyUI (8188) ← comfy-api-proxy (127.0.0.1:8189) ← comfy-sdk
+- App: FastAPI + thin web UI, FFmpeg/OpenCV (deinterlace, split, stitch, comparison video)
+- Model: LTX-2.5 22B + Restore IC-LoRA. Card settings: 8 steps, CFG 1, 960x544 tiles, 97-frame windows / 17-frame overlap
+- Low VRAM: INT8 transformer + INT8 Gemma + offload, 64 GB+ RAM recommended
+- The reference path requires use_streaming off
 
-## 10/28 오전 중단 판정 (못 넘으면 접고 OIBC로)
-- [x] 공식 저VRAM 설정으로 49프레임 완주(10/29, RTX 5090, `--lowvram`, 두 조건 110.4초)
-- [x] 97프레임 완주(10/29, 두 조건 177.9초)
-- [x] 10초 클립 완주(240프레임, 3구간 × 두 조건 482.4초, 샘플링한 VRAM 최고 31,927 MiB. 로딩·샘플링·디코드 단계별 시간과 RAM은 측정하지 않음)
-- [x] 인위적으로 열화한 클립 3개에서 무참조 / 올바른 참조 / 다른 사람 참조를 같은 seed로 비교(퍼블릭 도메인 오바마·바이든·미셸, seed 42, 97·240프레임)
-- [x] 올바른 참조가 무참조보다 일관되게 더 닮음: 강한 열화(1/5 축소, CRF 36)에서 세 클립 모두 올바른 참조 − 무참조가 +0.133 / +0.111 / +0.031, 다른 사람 참조보다도 높음. 기본 열화에서는 차이가 ±0.02 이내라 판단 근거가 아님
-- 계속 조건: 올바른 참조가 일관되게 더 닮고, 최소 한 파일이 끝까지 나와야 함. 아니면 중단.
-- 판정(10/29): 통과. 결과 영상 육안 확인과 강한 열화 수치로 계속 진행. 3개 클립 파일럿이라 일반적인 보장은 아님.
+## 10/28 morning kill gate (if it fails, drop this and move to OIBC)
+- [x] Finish 49 frames with the official low-VRAM settings (10/29, RTX 5090, `--lowvram`, both conditions 110.4 s)
+- [x] Finish 97 frames (10/29, both conditions 177.9 s)
+- [x] Finish a 10 s clip (240 frames, 3 windows × both conditions 482.4 s, sampled peak VRAM 31,927 MiB. Per-stage time for loading, sampling and decoding, and RAM, were not measured)
+- [x] Compare no reference / correct reference / wrong-person reference with the same seed on 3 artificially degraded clips (public-domain Obama, Biden, Michelle; seed 42; 97 and 240 frames)
+- [x] The correct reference is consistently more similar than no reference: under strong degradation (1/5 downscale, CRF 36), correct − none is +0.133 / +0.111 / +0.031 across the three clips, and also higher than the wrong-person reference. Under the default degradation the difference is within ±0.02, so it is not evidence either way
+- Continue condition: the correct reference must be consistently more similar, and at least one file must finish end to end. Otherwise stop.
+- Verdict (10/29): pass. Continuing based on visual review of the outputs and the strong-degradation numbers. This is a 3-clip pilot, not a general guarantee.
 
-## 일정 (KST)
-- 10/28 오전: 중단 판정 테스트
-- 10/28 오후: 참조 캔버스 생성, 분할·이어 붙이기 파이프라인
-- 10/29: 3분할 비교 UI, 디인터레이스, 프리셋, 와이프 MP4 내보내기
-- 10/30 낮: 데모 영상(2분 이하), README 설치법, 소셜 포스트
-- 10/30 22:00: 제출
+## Schedule (KST)
+- 10/28 morning: kill-gate tests
+- 10/28 afternoon: reference canvas generation, split/stitch pipeline
+- 10/29: three-way comparison UI, deinterlacing, presets, wipe MP4 export
+- 10/30 daytime: demo video (2 min or less), README install guide, social post
+- 10/30 22:00: submit
 
-## 데모
-- 첫 10초: 실제 사진 옆에 사진 없는 복원과 사진 넣은 복원을 나란히
-- 소스: 퍼블릭 도메인 Prelinger 홈무비 등
-  (예: https://commons.wikimedia.org/wiki/File:Home_Movies_-_Western_U.S.,_New_Mexico,_Mexico,_California,_Colorado,_Utah.webm)
-- 참조는 반드시 별도 사진. 복원 대상 프레임 자체를 참조로 쓰지 않음.
-- 인위적으로 열화한 테스트 클립은 화면에 표시
+## Demo
+- First 10 s: the real photo next to the restoration without photo and the restoration with photo, side by side
+- Sources: public-domain Prelinger home movies, etc.
+  (e.g. https://commons.wikimedia.org/wiki/File:Home_Movies_-_Western_U.S.,_New_Mexico,_Mexico,_California,_Colorado,_Utah.webm)
+- The reference must be a separate photo. Never use a frame from the clip being restored as the reference.
+- Label artificially degraded test clips on screen
 
-## 제출 체크리스트
-- [x] README 설치법·라이선스·모델 목록 완성
-- [ ] 레포 public 전환
-- [x] 2분 데모 대본 및 소스 확인 문서([DEMO.md](DEMO.md))
-- [ ] 2분 이하 실제 데모 영상 URL
-- [ ] #OpenSourceHiggsfield 소셜 포스트 URL
-- [ ] 모델 목록 기입(LTX-2.5 22B, Restore IC-LoRA, Gemma 인코더)
-- [ ] Typeform 제출
+## Submission checklist
+- [x] README install guide, licenses and model list complete
+- [ ] Switch repo to public
+- [x] 2-minute demo script and source-check document ([DEMO.md](DEMO.md))
+- [ ] URL of the actual demo video (2 min or less)
+- [ ] URL of the #OpenSourceHiggsfield social post
+- [ ] Fill in the model list (LTX-2.5 22B, Restore IC-LoRA, Gemma encoder)
+- [ ] Typeform submission
 
-## 위험과 솔직한 위치
-- 비슷한 연구가 이미 있음: IP-FVR, RG-FVR(참조 사진 기반 얼굴 영상 복원)
-- Topaz Image에는 참조 사진 얼굴 복원 기능이 이미 있음(Topaz Video는 미확인)
-- LTX Restore HF Space가 이미 있음: winterwarrior/ltx-restore-demo, breslavsky/ltx-restore-studio
-- 사진이 실제로 닮음을 개선하지 않을 수 있음 → 10/28 판정으로 확인
-- 32GB에서 렌더 시간 미측정
-- 참조 + 긴 클립 연결이 충돌할 수 있음
-- 복원은 생성 방식이라 색·세부는 복구가 아니라 재구성
-- 주장하지 않을 것: "길이 제한 없음", "Veo/Sora는 아이 영상을 거부" (Sora 제품은 2026-04-26 종료)
-- 내세울 것: 원본 / 무참조 / 참조 복원을 직접 비교해 사진의 효과를 보여 주는 로컬 오픈 웨이트 앱
+## Risks and honest positioning
+- Similar research already exists: IP-FVR, RG-FVR (reference-photo-based face video restoration)
+- Topaz Image already has reference-photo face restoration (Topaz Video not checked)
+- LTX Restore HF Spaces already exist: winterwarrior/ltx-restore-demo, breslavsky/ltx-restore-studio
+- The photo may not actually improve likeness → checked by the 10/28 gate
+- Render time on 32 GB not measured
+- Reference + long-clip stitching may conflict
+- Restoration is generative, so color and detail are reconstructed, not recovered
+- Do not claim: "no length limit", "Veo/Sora refuse videos of children" (the Sora product shut down on 2026-04-26)
+- What to highlight: a local open-weights app that shows the effect of the photo by directly comparing original / no-reference / reference restoration

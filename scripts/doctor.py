@@ -16,6 +16,18 @@ from app.config import Settings
 from app.workflow import LOCAL_NODE_TYPES, ModelFiles
 
 
+def loader_options(definition) -> list:
+    """Return loader choices from legacy [[...], {...}] or newer ["COMBO", {"options": [...]}] specs."""
+    if not definition:
+        return []
+    if isinstance(definition[0], list):
+        return definition[0]
+    if definition[0] == "COMBO" and len(definition) > 1 and isinstance(definition[1], dict):
+        options = definition[1].get("options", [])
+        return options if isinstance(options, list) else []
+    return []
+
+
 def inspect(settings: Settings, require_gpu: bool) -> dict:
     checks = []
 
@@ -58,7 +70,7 @@ def inspect(settings: Settings, require_gpu: bool) -> dict:
                                           ("VAELoader", "vae_name", models.video_vae),
                                           ("LTXICLoRALoaderModelOnly", "lora_name", models.restore_lora)):
                 definition = nodes.get(node, {}).get("input", {}).get("required", {}).get(input_name, [])
-                available = definition[0] if definition and isinstance(definition[0], list) else []
+                available = loader_options(definition)
                 record(name, name in available, "Available to loader" if name in available else "Missing or node schema changed")
         except (httpx.HTTPError, ValueError) as error:
             record("ComfyUI", False, type(error).__name__ + ": configure COMFYUI_URL for the GPU PC and start ComfyUI")

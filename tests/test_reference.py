@@ -52,3 +52,22 @@ def test_exif_orientation_is_applied(tmp_path):
     result = build_reference_canvas(photo, tmp_path / "out.png", BBox(5, 5, 30, 30), 128, 96,
                                     photo_bbox=BBox(0, 0, 40, 80))
     assert result.photo_bbox.height == 80
+
+
+def test_expand_grows_crop_and_target_around_centre(tmp_path):
+    photo = tmp_path / "photo.png"
+    image = Image.new("RGB", (100, 100), (0, 0, 255))
+    image.paste((240, 50, 10), (30, 30, 70, 70))
+    image.save(photo)
+    result = build_reference_canvas(photo, tmp_path / "canvas.png", BBox(40, 30, 40, 40), 128, 96,
+                                    photo_bbox=BBox(30, 30, 40, 40), expand=1.5)
+    canvas = np.array(Image.open(result.path))
+    assert np.all(canvas[30:70, 40:80] == [240, 50, 10])  # face itself stays at the selected box
+    assert np.all(canvas[22:28, 32:88] == [0, 0, 255])    # surrounding photo context fills the grown box
+    assert np.all(canvas[:20] == GRAY)
+    assert result.target_bbox == BBox(40, 30, 40, 40)
+
+
+def test_expand_out_of_range_rejected(tmp_path):
+    with pytest.raises(ValueError, match="expand"):
+        build_reference_canvas(tmp_path / "p.png", tmp_path / "o.png", BBox(0, 0, 20, 20), 128, 96, expand=0.5)

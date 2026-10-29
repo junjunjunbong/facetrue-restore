@@ -43,7 +43,7 @@ async def main() -> None:
     normalize_video(args.video, normal, settings.width, settings.height, settings.fps,
                     args.deinterlace, settings.max_seconds, settings.ffmpeg, settings.ffprobe)
     canvas = build_reference_canvas(args.photo, args.output / "reference.png", args.bbox,
-                                    settings.width, settings.height, args.photo_bbox)
+                                    settings.width, settings.height, args.photo_bbox, settings.reference_expand)
     print(json.dumps({"mode": settings.mode, "crop_method": canvas.crop_method}))
     result = await run_comparison(normal, canvas.path, args.output / "comparison", get_backend(settings), settings,
                                   args.seed, args.preset, args.synthetic,

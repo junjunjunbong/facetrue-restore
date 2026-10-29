@@ -30,6 +30,16 @@ class BBox:
     def corners(self) -> tuple[int, int, int, int]:
         return self.x, self.y, self.x + self.width, self.y + self.height
 
+    def expanded(self, factor: float, width: int, height: int) -> "BBox":
+        """Grow around the centre by `factor`, clipped to the image."""
+        if factor == 1.0:
+            return self
+        cx, cy = self.x + self.width / 2, self.y + self.height / 2
+        w, h = self.width * factor, self.height * factor
+        x0, y0 = int(max(0, cx - w / 2)), int(max(0, cy - h / 2))
+        x1, y1 = int(min(width, cx + w / 2)), int(min(height, cy + h / 2))
+        return BBox(x0, y0, x1 - x0, y1 - y0)
+
 
 @dataclass(frozen=True)
 class CanvasResult:
@@ -68,8 +78,12 @@ def detect_faces(image: Image.Image) -> list[BBox]:
 
 def build_reference_canvas(
     photo: Path, output: Path, bbox: BBox, width: int, height: int,
-    photo_bbox: BBox | None = None,
+    photo_bbox: BBox | None = None, expand: float = 1.0,
 ) -> CanvasResult:
+    """`expand` > 1 grows both the photo crop and the pasted area around their centres, so hair, jaw
+    and ears from the photo reach the model too (1.4 measured best in the strong-damage sweep)."""
+    if not 1.0 <= expand <= 3.0:
+        raise ValueError("Reference expand must be between 1.0 and 3.0")
     if width < 2 or height < 2 or width * height > 8_000_000:
         raise ValueError("Invalid canvas dimensions")
     bbox.validate(width, height)
@@ -90,8 +104,9 @@ def build_reference_canvas(
             crop = BBox((image.width - size) // 2, (image.height - size) // 2, size, size)
             crop_method = "center_fallback"
     canvas = Image.new("RGB", (width, height), GRAY)
-    face = ImageOps.fit(image.crop(crop.corners), (bbox.width, bbox.height), method=Image.Resampling.LANCZOS)
-    canvas.paste(face, (bbox.x, bbox.y))
+    source, target = crop.expanded(expand, image.width, image.height), bbox.expanded(expand, width, height)
+    face = ImageOps.fit(image.crop(source.corners), (target.width, target.height), method=Image.Resampling.LANCZOS)
+    canvas.paste(face, (target.x, target.y))
     output.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(output, format="PNG")
     return CanvasResult(output, bbox, crop, crop_method)

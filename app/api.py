@@ -144,7 +144,8 @@ async def create_canvas(request: Request, body: CanvasInput):
     try:
         result = await asyncio.to_thread(build_reference_canvas, directory / f"photo-{photo_id}.png", output,
                                          body.bbox.box(), info["width"], info["height"],
-                                         body.photo_bbox.box() if body.photo_bbox else None)
+                                         body.photo_bbox.box() if body.photo_bbox else None,
+                                         request.app.state.settings.reference_expand)
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
     metadata = {"reference_id": reference_id, "upload_id": body.upload_id, "photo_id": photo_id,

@@ -76,9 +76,21 @@ Use a table like this after running the jobs:
 
 | Trial | Frames / size | No-photo completed | With-photo completed | Total time | Load / sample / decode | Sampled VRAM max | GPU-PC RAM max | Visual join check |
 |---|---|---|---|---|---|---|---|---|
-| Small preflight | 49 / actual size | Not run | Not run | Not measured | Not measured | Not measured | Not measured | Not checked |
-| Window preflight | 97 / actual size | Not run | Not run | Not measured | Not measured | Not measured | Not measured | Not checked |
-| Full short clip | 240 / actual size | Not run | Not run | Not measured | Not measured | Not measured | Not measured | Not checked |
+| Small preflight | 49 / 1280×736 | Yes | Yes | 110.4 s | Not measured | Not sampled | Not measured | One window, no joins |
+| Window preflight | 97 / 1280×736 | Yes | Yes | 177.9 s | Not measured | Not sampled | Not measured | One window, no joins |
+| Full short clip | 240 / 1280×736 | Yes (3 windows) | Yes (3 windows) | 482.4 s | Not measured | Not sampled | Not measured | Not recorded |
+
+Results recorded on 10/29 (02:34-02:50 KST) on one RTX 5090 (32,607 MiB), ComfyUI started with `--lowvram`, 8 steps, CFG 1, seed 42. "Total time" is the `time` wall time of `scripts/restore.py`. It covers both arms plus comparison export, from a Mac through the proxy, so it is not a per-window rendering speed. Cache state between trials was not recorded. One earlier 49-frame attempt failed after 4.6 s with `ComfyJobFailed` (ComfyUI job status failed). The runs above came after it.
+
+The identity-pilot runs (section 4) were sampled with `nvidia-smi` every 200 ms for the whole device:
+
+| Pilot run | Renders | Wall time | Sampled VRAM max |
+|---|---|---|---|
+| 97 frames, repo-default damage | 9 × 97 frames | 661.5 s | 32,087 MiB |
+| 240 frames, repo-default damage | 9 × 240 frames (3 windows each) | 2,086.6 s | 31,927 MiB |
+| 97 frames, strong damage | 9 × 97 frames | 662.2 s | 31,927 MiB |
+
+The strong-damage pilot averages about 74 s per 97-frame render, including evaluation overhead. GPU-PC system RAM was not measured.
 
 Replace a cell only with a result from retained logs. Preserve failures, including out-of-memory errors. Do not use mock wall times as rendering speeds.
 

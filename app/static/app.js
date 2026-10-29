@@ -13,19 +13,19 @@
   const videos = [$('originalVideo'), $('withoutVideo'), $('withVideo')];
   const MAX_UPLOAD = 256 * 1024 * 1024;
   const stages = {
-    queued: '작업 대기 중', running: '복원 중', preprocessing: '영상 준비 중',
-    preprocess: '영상 준비 중', without: '사진 없이 복원 중', with: '사진을 넣고 복원 중',
-    without_reference: '사진 없이 복원 중', with_reference: '사진을 넣고 복원 중',
-    stitch: '클립을 이어 붙이는 중', stitching: '클립을 이어 붙이는 중',
-    export: '비교 영상 내보내는 중', exporting: '비교 영상 내보내는 중',
-    succeeded: '완료', failed: '작업을 완료하지 못했습니다',
+    queued: 'Queued', running: 'Restoring', preprocessing: 'Preparing video',
+    preprocess: 'Preparing video', without: 'Restoring without photo', with: 'Restoring with photo',
+    without_reference: 'Restoring without photo', with_reference: 'Restoring with photo',
+    stitch: 'Stitching windows', stitching: 'Stitching windows',
+    export: 'Exporting comparison', exporting: 'Exporting comparison',
+    succeeded: 'Done', failed: 'The job did not finish',
   };
 
   function safeUrl(value) {
-    if (typeof value !== 'string' || !value) throw new Error('서버가 파일 주소를 반환하지 않았습니다.');
+    if (typeof value !== 'string' || !value) throw new Error('The server did not return a file URL.');
     const url = new URL(value, window.location.href);
     if (url.origin !== window.location.origin || !['http:', 'https:'].includes(url.protocol)) {
-      throw new Error('같은 앱의 파일 주소만 열 수 있습니다.');
+      throw new Error('Only file URLs from this app can be opened.');
     }
     return url.href;
   }
@@ -40,19 +40,19 @@
     try {
       const response = await fetch(path, { ...rest, signal: controller.signal, credentials: 'same-origin' });
       let data;
-      try { data = await response.json(); } catch { throw new Error(`서버 응답을 읽지 못했습니다. (HTTP ${response.status})`); }
+      try { data = await response.json(); } catch { throw new Error(`Could not read the server response. (HTTP ${response.status})`); }
       if (!response.ok) {
         const detail = data.detail ?? data.error ?? data.message;
         const text = typeof detail === 'string' ? detail : Array.isArray(detail)
-          ? detail.map((item) => item.msg || '입력 값을 확인해 주세요.').join(' ') : '';
-        const error = new Error(text || `요청을 처리하지 못했습니다. (HTTP ${response.status})`);
+          ? detail.map((item) => item.msg || 'Please check the input.').join(' ') : '';
+        const error = new Error(text || `The request failed. (HTTP ${response.status})`);
         error.status = response.status;
         throw error;
       }
       return data;
     } catch (error) {
-      if (controller.signal.aborted && !signal?.aborted) throw new Error('서버 응답 시간이 초과되었습니다. 연결과 실행 상태를 확인해 주세요.');
-      if (error instanceof TypeError) throw new Error('서버에 연결하지 못했습니다. 앱 서버가 실행 중인지 확인해 주세요.');
+      if (controller.signal.aborted && !signal?.aborted) throw new Error('The server timed out. Check the connection and whether it is running.');
+      if (error instanceof TypeError) throw new Error('Could not reach the server. Check that the app server is running.');
       throw error;
     } finally {
       window.clearTimeout(timer);
@@ -94,7 +94,7 @@
     ['seed', 'preset', 'synthetic'].forEach((id) => { $(id).disabled = state.busy.job; });
     const ready = state.config && state.upload && state.reference && state.box && state.photo;
     $('runButton').disabled = !ready || Object.values(state.busy).some(Boolean);
-    setText('runLabel', state.busy.job ? '복원 진행 중' : state.busy.canvas ? '캔버스 준비 중' : '비교 영상 만들기');
+    setText('runLabel', state.busy.job ? 'Restoring…' : state.busy.canvas ? 'Preparing canvas' : 'Create comparison');
     $('videoDrop').classList.toggle('busy', state.busy.video);
     $('photoDrop').classList.toggle('busy', state.busy.photo);
     $('stepOne').classList.toggle('active', !state.upload);
@@ -114,8 +114,8 @@
   function pauseVideos() {
     videos.forEach((video) => video.pause());
     state.playing = false;
-    setText('playButton', '재생');
-    $('playButton').setAttribute('aria-label', '세 영상을 함께 재생');
+    setText('playButton', 'Play');
+    $('playButton').setAttribute('aria-label', 'Play all three videos');
   }
 
   function resetResults() {
@@ -146,7 +146,7 @@
     $('referencePreview').removeAttribute('src');
     $('canvasPlaceholder').hidden = false;
     $('retryCanvas').hidden = true;
-    setText('canvasState', '사진 + 얼굴 위치');
+    setText('canvasState', 'Photo + face position');
   }
 
   function clearPhoto() {
@@ -158,16 +158,16 @@
     $('photoPlaceholder').hidden = false;
     $('replacePhoto').hidden = true;
     $('photoInput').value = '';
-    setText('photoStatus', state.upload ? '영상과 다른 시점에 찍은 실제 사진을 선택하세요.' : '먼저 원본 영상을 올려주세요.');
+    setText('photoStatus', state.upload ? 'Choose a real photo taken at a different time than the video.' : 'Upload the source video first.');
   }
 
   function imageFrom(url) {
     const checked = safeUrl(url);
     return new Promise((resolve, reject) => {
       const img = new Image();
-      const timer = window.setTimeout(() => reject(new Error('이미지 미리보기의 응답 시간이 초과되었습니다. 다시 시도해 주세요.')), 20000);
+      const timer = window.setTimeout(() => reject(new Error('The image preview timed out. Please try again.')), 20000);
       img.onload = () => { window.clearTimeout(timer); resolve(img); };
-      img.onerror = () => { window.clearTimeout(timer); reject(new Error('이미지 미리보기를 불러오지 못했습니다. 다시 업로드해 주세요.')); };
+      img.onerror = () => { window.clearTimeout(timer); reject(new Error('Could not load the image preview. Please upload again.')); };
       img.src = checked;
     });
   }
@@ -240,7 +240,7 @@
     $('bboxWidth').max = state.upload.width;
     $('bboxHeight').max = state.upload.height;
     $('bboxFields').hidden = false;
-    setText('frameHint', '선택한 얼굴 · 아래에서 영역 조정');
+    setText('frameHint', 'Face selected · adjust the region below');
   }
 
   function selectionChanged(kind) {
@@ -264,7 +264,7 @@
     const box = detected ? { ...detected } : defaultBox(x, y, info, photo);
     if (photo) {
       state.photoBox = box;
-      setText('photoStatus', detected ? '선택한 얼굴을 참조 사진에서 크롭합니다.' : '직접 지정한 위치를 크롭합니다. 얼굴이 잘 들어오는지 확인하세요.');
+      setText('photoStatus', detected ? 'Cropping the selected face from the reference photo.' : 'Cropping the position you set. Make sure the face fits.');
     } else state.box = box;
     selectionChanged(kind);
   }
@@ -290,7 +290,7 @@
 
   async function uploadVideo(file) {
     if (!file || state.busy.video || state.busy.job) return;
-    if (file.size > MAX_UPLOAD) { showError(new Error('영상은 256 MB 이하로 올려주세요.')); return; }
+    if (file.size > MAX_UPLOAD) { showError(new Error('Videos must be 256 MB or smaller.')); return; }
     hideError();
     state.busy.video = true;
     state.videoFile = file;
@@ -304,7 +304,7 @@
     $('bboxFields').hidden = true;
     $('videoMetadata').hidden = true;
     $('replaceVideo').hidden = true;
-    setText('videoStatus', '영상을 업로드하고 첫 프레임을 준비하고 있습니다…');
+    setText('videoStatus', 'Uploading the video and preparing the first frame…');
     updateUI();
     try {
       const form = new FormData();
@@ -312,7 +312,7 @@
       form.append('deinterlace', String($('deinterlace').checked));
       const data = await api('/api/uploads', { method: 'POST', body: form, timeout: 120000 });
       if (!data.upload_id || !Number.isFinite(data.width) || !Number.isFinite(data.height) || data.width < 8 || data.height < 8) {
-        throw new Error('업로드 응답에 영상 정보가 없습니다.');
+        throw new Error('The upload response has no video info.');
       }
       const img = await imageFrom(data.frame_url);
       state.upload = { ...data, faces: faceList(data) };
@@ -322,13 +322,13 @@
       $('replaceVideo').hidden = false;
       $('videoMetadata').hidden = false;
       setText('videoFilename', file.name);
-      setText('videoStats', `${data.width} × ${data.height} · ${data.fps} fps · ${Number(data.duration).toFixed(2)}초`);
-      setText('videoStatus', state.upload.faces.length ? `얼굴 ${state.upload.faces.length}개 감지. 복원할 한 사람의 얼굴을 클릭하세요.` : '자동으로 찾은 얼굴이 없습니다. 얼굴을 클릭한 뒤 영역을 직접 맞춰주세요.');
-      setText('frameHint', '복원할 얼굴을 클릭하세요');
-      setText('photoStatus', '영상과 다른 시점에 찍은 실제 사진을 선택하세요.');
+      setText('videoStats', `${data.width} × ${data.height} · ${data.fps} fps · ${Number(data.duration).toFixed(2)} s`);
+      setText('videoStatus', state.upload.faces.length ? `${state.upload.faces.length} face(s) detected. Click the one person to restore.` : 'No face found automatically. Click the face, then fit the region by hand.');
+      setText('frameHint', 'Click the face to restore');
+      setText('photoStatus', 'Choose a real photo taken at a different time than the video.');
       renderSelection('frame');
     } catch (error) {
-      setText('videoStatus', '영상을 준비하지 못했습니다. 파일과 연결 상태를 확인해 주세요.');
+      setText('videoStatus', 'Could not prepare the video. Check the file and the connection.');
       showError(error);
     } finally {
       state.busy.video = false;
@@ -339,20 +339,20 @@
 
   async function uploadPhoto(file) {
     if (!file || state.busy.photo || state.busy.job || state.busy.video) return;
-    if (!state.upload) { showError(new Error('먼저 원본 영상을 올려주세요.')); return; }
-    if (file.size > 25 * 1024 * 1024) { showError(new Error('사진은 25 MB 이하로 올려주세요.')); return; }
+    if (!state.upload) { showError(new Error('Upload the source video first.')); return; }
+    if (file.size > 25 * 1024 * 1024) { showError(new Error('Photos must be 25 MB or smaller.')); return; }
     hideError();
     clearPhoto();
     resetResults();
     state.busy.photo = true;
     const uploadId = state.upload.upload_id;
-    setText('photoStatus', '사진을 업로드하고 얼굴을 확인하고 있습니다…');
+    setText('photoStatus', 'Uploading the photo and finding the face…');
     updateUI();
     try {
       const form = new FormData(); form.append('photo', file);
       const data = await api(`/api/uploads/${encodeURIComponent(uploadId)}/photo`, { method: 'POST', body: form, timeout: 60000 });
       if (!data.photo_id || !Number.isFinite(data.width) || !Number.isFinite(data.height) || data.width < 8 || data.height < 8) {
-        throw new Error('업로드 응답에 사진 정보가 없습니다.');
+        throw new Error('The upload response has no photo info.');
       }
       const img = await imageFrom(data.photo_url);
       if (state.upload?.upload_id !== uploadId) return;
@@ -360,16 +360,16 @@
       state.photoImage = img;
       state.photoBox = state.photo.faces.length === 1 ? { ...state.photo.faces[0] }
         : state.photo.faces.length > 1 ? null : defaultBox(data.width / 2, data.height / 2, data, true);
-      setText('photoStatus', state.photo.faces.length === 1 ? '얼굴 1개를 자동 선택했습니다. 클릭해서 크롭을 조정할 수 있습니다.'
-        : state.photo.faces.length > 1 ? `얼굴 ${state.photo.faces.length}개를 찾았습니다. 사용할 얼굴을 클릭하세요.`
-        : '중앙 크롭을 사용합니다. 사용할 얼굴을 클릭해서 조정하세요.');
+      setText('photoStatus', state.photo.faces.length === 1 ? 'Selected 1 face automatically. Click to adjust the crop.'
+        : state.photo.faces.length > 1 ? `Found ${state.photo.faces.length} faces. Click the one to use.`
+        : 'Using a center crop. Click the face to use to adjust it.');
       $('photoPlaceholder').hidden = true;
       $('photoView').hidden = false;
       $('replacePhoto').hidden = false;
       renderSelection('photo');
       scheduleCanvas();
     } catch (error) {
-      setText('photoStatus', '사진을 준비하지 못했습니다. 다른 사진으로 다시 시도해 주세요.');
+      setText('photoStatus', 'Could not prepare the photo. Try a different photo.');
       showError(error);
     } finally {
       state.busy.photo = false;
@@ -381,14 +381,14 @@
   function scheduleCanvas() {
     clearReference();
     if (!state.upload || !state.photo || !state.box || !state.photoBox) {
-      if (state.photo && !state.box) setText('canvasState', '영상에서 얼굴을 선택하세요');
-      else if (state.photo && !state.photoBox) setText('canvasState', '사진에서 사용할 얼굴을 선택하세요');
+      if (state.photo && !state.box) setText('canvasState', 'Select a face in the video');
+      else if (state.photo && !state.photoBox) setText('canvasState', 'Select the face to use in the photo');
       updateUI();
       return;
     }
     const version = state.canvasVersion;
     state.busy.canvas = true;
-    setText('canvasState', '캔버스 준비 중…');
+    setText('canvasState', 'Preparing canvas…');
     updateUI();
     state.canvasTimer = window.setTimeout(() => buildCanvas(version), 350);
   }
@@ -401,7 +401,7 @@
     try {
       const data = await api('/api/canvas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: controller.signal });
       if (version !== state.canvasVersion) return;
-      if (!data.reference_id) throw new Error('서버가 참조 캔버스를 만들지 못했습니다.');
+      if (!data.reference_id) throw new Error('The server could not build the reference canvas.');
       const previewUrl = safeUrl(data.canvas_url);
       await imageFrom(previewUrl);
       if (version !== state.canvasVersion) return;
@@ -409,11 +409,11 @@
       $('referencePreview').src = previewUrl;
       $('referencePreview').hidden = false;
       $('canvasPlaceholder').hidden = true;
-      setText('canvasState', '준비 완료');
+      setText('canvasState', 'Ready');
       $('retryCanvas').hidden = true;
     } catch (error) {
       if (version !== state.canvasVersion || controller.signal.aborted) return;
-      setText('canvasState', '생성 실패');
+      setText('canvasState', 'Failed');
       $('retryCanvas').hidden = false;
       showError(error);
     } finally {
@@ -429,7 +429,7 @@
     if ($('runButton').disabled || !state.upload || !state.reference) return;
     const seed = Number($('seed').value);
     if ($('seed').value.trim() === '' || !Number.isInteger(seed) || seed < 0 || seed > 4294967295) {
-      showError(new Error('Seed는 0–4294967295 범위의 정수로 입력하세요.')); $('seed').focus(); return;
+      showError(new Error('Seed must be an integer from 0 to 4294967295.')); $('seed').focus(); return;
     }
     hideError(); resetResults(); stopPolling();
     state.busy.job = true;
@@ -438,8 +438,8 @@
     $('progressSection').hidden = false;
     $('jobProgress').value = 0;
     setText('progressPercent', '0%');
-    setText('progressTitle', '작업 요청 중');
-    setText('progressMessage', '사진 없는 복원과 사진을 넣은 복원을 요청합니다.');
+    setText('progressTitle', 'Submitting job');
+    setText('progressMessage', 'Requesting a restoration without the photo and one with it.');
     setText('jobId', '');
     updateUI();
     try {
@@ -448,7 +448,7 @@
         body: JSON.stringify({ upload_id: state.upload.upload_id, reference_id: state.reference.reference_id, seed,
           preset: $('preset').value, synthetic: $('synthetic').checked }),
       });
-      if (!data.id) throw new Error('서버가 작업 ID를 반환하지 않았습니다. 중복 실행 전에 서버 상태를 확인하세요.');
+      if (!data.id) throw new Error('The server returned no job ID. Check the server before running again.');
       state.playbackFps = Number(state.upload.fps) || 24;
       rememberJob(String(data.id), { synthetic: $('synthetic').checked, fps: state.playbackFps });
       setText('jobId', `JOB ${data.id}`);
@@ -456,7 +456,7 @@
       $('progressSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (error) {
       state.busy.job = false;
-      setText('progressTitle', '작업 요청을 확인하지 못했습니다');
+      setText('progressTitle', 'Could not confirm the job request');
       setText('progressMessage', error.message);
       showError(error);
       updateUI();
@@ -475,19 +475,19 @@
       const progress = Number.isFinite(job.progress) ? Math.max(0, Math.min(1, job.progress)) : 0;
       $('jobProgress').value = progress;
       setText('progressPercent', `${Math.round(progress * 100)}%`);
-      setText('progressTitle', stages[job.stage] || stages[job.status] || '진행 상태 확인 중');
-      setText('progressMessage', job.message || '서버에서 처리 중입니다. 페이지를 열어 두세요.');
+      setText('progressTitle', stages[job.stage] || stages[job.status] || 'Checking progress');
+      setText('progressMessage', job.message || 'Processing on the server. Keep this page open.');
       if (job.status === 'succeeded') {
         again = false; state.busy.job = false;
         await showResults(job);
       } else if (job.status === 'failed') {
         again = false; state.busy.job = false;
-        const message = typeof job.error === 'string' ? job.error : job.message || '서버에서 작업이 실패했습니다.';
-        setText('progressTitle', '작업을 완료하지 못했습니다');
+        const message = typeof job.error === 'string' ? job.error : job.message || 'The job failed on the server.';
+        setText('progressTitle', 'The job did not finish');
         setText('progressMessage', message);
         showError(new Error(message));
       } else if (!['queued', 'running'].includes(job.status)) {
-        throw new Error('서버가 알 수 없는 작업 상태를 반환했습니다.');
+        throw new Error('The server returned an unknown job status.');
       }
     } catch (error) {
       if (version !== state.jobVersion || controller.signal.aborted) return;
@@ -495,15 +495,15 @@
         again = false;
         state.busy.job = false;
         rememberJob(null);
-        setText('progressTitle', '이전 작업을 찾지 못했습니다');
-        setText('progressMessage', '서버가 재시작되었거나 작업이 삭제되었을 수 있습니다. 새 영상을 올려 다시 시작할 수 있습니다.');
+        setText('progressTitle', 'Previous job not found');
+        setText('progressMessage', 'The server may have restarted or the job was deleted. Upload a video to start again.');
       } else if (!again) {
-        setText('progressTitle', '작업은 끝났지만 결과를 열지 못했습니다');
+        setText('progressTitle', 'The job finished but the results could not be opened');
         setText('progressMessage', error.message); showError(error);
       } else {
         state.pollErrors += 1;
         delay = Math.min(15000, 3000 * state.pollErrors);
-        setText('progressMessage', `상태 확인이 지연되고 있습니다. ${Math.round(delay / 1000)}초 후 다시 확인합니다. ${error.message}`);
+        setText('progressMessage', `Status check delayed. Retrying in ${Math.round(delay / 1000)} s. ${error.message}`);
       }
     } finally {
       if (version === state.jobVersion) {
@@ -549,7 +549,7 @@
       if (videos.some(v => v.seeking || Math.abs(v.currentTime - state.seekTarget) > 0.002)) return;
       state.seeking = false;
       $('playButton').disabled = false;
-      setText('playerStatus', '같은 프레임으로 맞췄습니다.');
+      setText('playerStatus', 'Synced to the same frame.');
       syncPosition();
     });
   }
@@ -560,7 +560,7 @@
     state.seekTarget = Math.max(0, Math.min(state.duration - 1 / state.playbackFps,
       Math.round(value * state.playbackFps) / state.playbackFps));
     $('playButton').disabled = true;
-    setText('playerStatus', '세 영상의 프레임을 맞추는 중…');
+    setText('playerStatus', 'Syncing the three videos…');
     videos.forEach(video => { if (video.readyState >= 1) video.currentTime = state.seekTarget; });
     setText('currentTime', formatTime(state.seekTarget));
     finishSeeking();
@@ -574,11 +574,11 @@
     try {
       await Promise.all(videos.map((video) => video.play()));
       state.playing = true;
-      setText('playButton', '일시정지');
-      $('playButton').setAttribute('aria-label', '세 영상을 함께 일시정지');
+      setText('playButton', 'Pause');
+      $('playButton').setAttribute('aria-label', 'Pause all three videos');
     } catch {
       pauseVideos();
-      setText('playerStatus', '브라우저에서 동시에 재생하지 못했습니다. 다시 재생하거나 비교 MP4를 다운로드하세요.');
+      setText('playerStatus', 'The browser could not play them together. Play again or download the comparison MP4.');
     }
   }
 
@@ -598,11 +598,11 @@
     const urls = {};
     for (const key of ['original', 'without', 'with', 'side_by_side', 'wipe', 'manifest']) urls[key] = safeUrl(outputs[key]);
     state.resultMode = job.mode || state.config?.mode;
-    if (!['mock', 'comfy'].includes(state.resultMode)) throw new Error('결과의 실행 모드를 확인하지 못했습니다.');
+    if (!['mock', 'comfy'].includes(state.resultMode)) throw new Error('Could not confirm the run mode of the results.');
     const mock = state.resultMode === 'mock';
     $('resultMockBadge').hidden = !mock;
     $('syntheticBadge').hidden = !$('synthetic').checked;
-    setText('resultNotice', mock ? 'MOCK 결과입니다. 세 영상은 입력 복사본이며, 사진으로 닮음이 개선되었다는 증거가 아닙니다.' : '복원 결과는 생성된 추정입니다. 얼굴과 원본 영상의 세부를 함께 확인하세요.');
+    setText('resultNotice', mock ? 'MOCK result. All three videos are input copies, not evidence that the photo improved likeness.' : 'Restorations are generated estimates. Check the face against the original\'s detail.');
     if (state.photoImage && state.photoBox) {
       const crop = document.createElement('canvas');
       const b = state.photoBox;
@@ -627,8 +627,8 @@
     $('resultsSection').hidden = false;
     $('jobProgress').value = 1;
     setText('progressPercent', '100%');
-    setText('progressTitle', mock ? 'MOCK 비교 파일 준비 완료' : '비교 파일 준비 완료');
-    setText('progressMessage', mock ? '입력 복사본을 생성했습니다. 실제 AI 복원은 실행하지 않았습니다.' : '결과를 재생하고 참조 사진의 효과를 확인하세요.');
+    setText('progressTitle', mock ? 'MOCK comparison files ready' : 'Comparison files ready');
+    setText('progressMessage', mock ? 'Created input copies. No AI restoration was run.' : 'Play the results and judge the reference photo\'s effect.');
     $('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -648,7 +648,7 @@
   async function initialize() {
     try {
       const config = await api('/api/config');
-      if (!['mock', 'comfy'].includes(config.mode)) throw new Error('앱 실행 모드를 확인하지 못했습니다.');
+      if (!['mock', 'comfy'].includes(config.mode)) throw new Error('Could not confirm the app mode.');
       state.config = config;
       const mock = config.mode === 'mock';
       setText('modeBadge', mock ? 'MOCK MODE' : 'LTX · LOCAL');
@@ -666,12 +666,12 @@
         state.busy.job = true;
         $('progressSection').hidden = false;
         setText('jobId', `JOB ${id}`);
-        setText('progressTitle', '이전 작업 확인 중');
+        setText('progressTitle', 'Checking previous job');
         updateUI();
         pollJob(id, ++state.jobVersion);
       }
     } catch (error) {
-      setText('modeBadge', '연결 확인 필요');
+      setText('modeBadge', 'Check connection');
       showError(error);
       updateUI();
     }
@@ -701,7 +701,7 @@
     video.addEventListener('loadedmetadata', refreshDuration);
     video.addEventListener('error', () => {
       if (!video.getAttribute('src')) return;
-      pauseVideos(); setText('playerStatus', '영상을 브라우저에서 읽지 못했습니다. MP4 다운로드로 확인하세요.');
+      pauseVideos(); setText('playerStatus', 'The browser could not read the videos. Download the MP4 to view them.');
     });
   });
   videos[0].addEventListener('timeupdate', syncPosition);
@@ -714,7 +714,7 @@
   });
   $('muteButton').addEventListener('click', () => {
     videos[0].muted = !videos[0].muted;
-    setText('muteButton', videos[0].muted ? '음소거 해제' : '음소거');
+    setText('muteButton', videos[0].muted ? 'Unmute' : 'Mute');
   });
   $('threeWayTab').addEventListener('click', () => switchView('three'));
   $('wipeTab').addEventListener('click', () => switchView('wipe'));

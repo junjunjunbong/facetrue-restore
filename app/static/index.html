@@ -1,88 +1,88 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="별도의 실제 사진을 기준으로 옛 가족 영상의 복원 결과를 비교합니다.">
+  <meta name="description" content="Compare restorations of old family footage against a separate real photo of the person.">
   <title>FaceTrue Restore</title>
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/app.js" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#workspace">작업 영역으로 이동</a>
+  <a class="skip-link" href="#workspace">Skip to workspace</a>
   <header class="masthead">
-    <a class="brand" href="/" aria-label="FaceTrue Restore 홈">
+    <a class="brand" href="/" aria-label="FaceTrue Restore home">
       <span class="brand-mark" aria-hidden="true">F<span></span></span>
       <span>FaceTrue <span class="brand-light">Restore</span></span>
     </a>
-    <div class="header-right"><span class="local-indicator"><i aria-hidden="true"></i> LOCAL WORKSPACE</span><span id="modeBadge" class="badge">환경 확인 중</span></div>
+    <div class="header-right"><span class="local-indicator"><i aria-hidden="true"></i> LOCAL WORKSPACE</span><span id="modeBadge" class="badge">Checking setup</span></div>
   </header>
 
   <main>
     <section class="intro" aria-labelledby="pageTitle">
       <div><p class="eyebrow">FAMILY ARCHIVE / REFERENCE-GUIDED RESTORATION</p>
-        <h1 id="pageTitle">사진을 기준으로,<br><span>복원을 직접 비교하세요.</span></h1>
-        <p class="intro-copy">옛 영상 속 한 사람을 선택하고, 그 사람의 별도 사진을 더하세요.<br class="desktop-break">원본 · 사진 없는 복원 · 사진을 넣은 복원을 같은 시점에서 확인합니다.</p>
+        <h1 id="pageTitle">Anchor it to a photo.<br><span>Compare the restorations yourself.</span></h1>
+        <p class="intro-copy">Pick one person in old footage and add a separate photo of them.<br class="desktop-break">See the original, a restoration without the photo and one with it, on the same frame.</p>
       </div>
-      <div class="scope"><span class="scope-label">첫 복원에 맞는 클립</span><strong>한 사람. 4–10초.</strong><span>카메라와 얼굴 위치가 크게 움직이지 않는 구도</span><div class="scope-rule"></div><span>복원된 색과 세부는 생성된 결과입니다.<br>실제 모습의 정확한 재현을 보장하지 않습니다.</span></div>
+      <div class="scope"><span class="scope-label">Best first clip</span><strong>One person. 4–10 s.</strong><span>Steady camera, face stays roughly in place</span><div class="scope-rule"></div><span>Restored color and detail are generated.<br>They are not guaranteed to match how the person really looked.</span></div>
     </section>
 
-    <div id="mockNotice" class="notice mock-notice" role="status" hidden><span class="notice-icon" aria-hidden="true">M</span><div><strong>MOCK 모드 — 입력 복사로 앱 흐름을 확인합니다.</strong><p>AI 복원을 실행하지 않습니다. 사진 유무에 따른 차이나 품질 개선의 증거로 사용할 수 없습니다.</p></div></div>
-    <div id="errorBanner" class="notice error-notice" role="alert" hidden><div><strong>작업을 확인해 주세요.</strong><p id="errorMessage"></p></div><button id="dismissError" class="icon-button" aria-label="오류 안내 닫기" type="button">×</button></div>
+    <div id="mockNotice" class="notice mock-notice" role="status" hidden><span class="notice-icon" aria-hidden="true">M</span><div><strong>MOCK mode — input copies to check the app flow.</strong><p>No AI restoration runs. Do not use this as evidence of a photo effect or a quality gain.</p></div></div>
+    <div id="errorBanner" class="notice error-notice" role="alert" hidden><div><strong>Please check the job.</strong><p id="errorMessage"></p></div><button id="dismissError" class="icon-button" aria-label="Dismiss error" type="button">×</button></div>
 
-    <nav class="steps" aria-label="복원 순서"><span id="stepOne" class="step active"><b>01</b> 영상 준비</span><span id="stepTwo" class="step"><b>02</b> 얼굴과 사진</span><span id="stepThree" class="step"><b>03</b> 복원과 비교</span></nav>
+    <nav class="steps" aria-label="Restoration steps"><span id="stepOne" class="step active"><b>01</b> Prepare video</span><span id="stepTwo" class="step"><b>02</b> Face and photo</span><span id="stepThree" class="step"><b>03</b> Restore and compare</span></nav>
 
-    <section id="workspace" class="workspace" aria-label="영상과 참조 사진 준비">
+    <section id="workspace" class="workspace" aria-label="Prepare video and reference photo">
       <article class="panel video-panel">
-        <div class="panel-heading"><div><p class="eyebrow">01 / SOURCE FOOTAGE</p><h2>옛 영상을 올려주세요</h2></div><span class="small-tag">4–10초</span></div>
+        <div class="panel-heading"><div><p class="eyebrow">01 / SOURCE FOOTAGE</p><h2>Upload old footage</h2></div><span class="small-tag">4–10 s</span></div>
         <div id="videoDrop" class="drop-zone video-drop">
-          <input id="videoInput" class="visually-hidden" type="file" accept="video/*,.mp4,.mov,.mkv,.avi,.webm,.m4v" aria-label="원본 영상 선택">
-          <div id="videoPlaceholder" class="upload-placeholder"><div class="film-icon" aria-hidden="true"><i></i><i></i><i></i></div><strong>가족 영상을 여기에 놓으세요</strong><p>MP4, MOV 등 FFmpeg가 읽을 수 있는 영상 · 최대 256 MB</p><button id="chooseVideo" class="button secondary" type="button">영상 선택 <span aria-hidden="true">↗</span></button></div>
-          <div id="frameView" class="frame-view" hidden><canvas id="frameCanvas" tabindex="0" role="img" aria-label="원본 첫 프레임. 복원할 얼굴을 클릭하세요. 방향키로 선택 영역을 옮길 수 있습니다."></canvas><div class="frame-caption"><span>FIRST FRAME</span><span id="frameHint">복원할 얼굴을 클릭하세요</span></div></div>
+          <input id="videoInput" class="visually-hidden" type="file" accept="video/*,.mp4,.mov,.mkv,.avi,.webm,.m4v" aria-label="Choose source video">
+          <div id="videoPlaceholder" class="upload-placeholder"><div class="film-icon" aria-hidden="true"><i></i><i></i><i></i></div><strong>Drop family footage here</strong><p>MP4, MOV or any video FFmpeg can read · up to 256 MB</p><button id="chooseVideo" class="button secondary" type="button">Choose video <span aria-hidden="true">↗</span></button></div>
+          <div id="frameView" class="frame-view" hidden><canvas id="frameCanvas" tabindex="0" role="img" aria-label="First frame of the source. Click the face to restore. Arrow keys move the selection."></canvas><div class="frame-caption"><span>FIRST FRAME</span><span id="frameHint">Click the face to restore</span></div></div>
         </div>
-        <div class="source-footer"><label class="check-row"><input id="deinterlace" type="checkbox" checked><span>인터레이스 제거 <small>VHS의 가로 줄무늬에 사용</small></span></label><button id="replaceVideo" class="text-button" type="button" hidden>영상 바꾸기</button></div>
-        <p id="videoStatus" class="status-line" role="status" aria-live="polite">선택한 영상은 이 앱과 연결된 복원 서버에서 처리합니다.</p>
+        <div class="source-footer"><label class="check-row"><input id="deinterlace" type="checkbox" checked><span>Deinterlace <small>for VHS line artifacts</small></span></label><button id="replaceVideo" class="text-button" type="button" hidden>Replace video</button></div>
+        <p id="videoStatus" class="status-line" role="status" aria-live="polite">Your video is processed by the restoration server connected to this app.</p>
         <div id="videoMetadata" class="metadata" hidden><span id="videoFilename"></span><span id="videoStats"></span></div>
-        <fieldset id="bboxFields" class="bbox-fields" disabled hidden><legend>얼굴 영역 조정 <span>첫 프레임 기준 · px</span></legend><label>X<input id="bboxX" type="number" min="0" step="1" inputmode="numeric"></label><label>Y<input id="bboxY" type="number" min="0" step="1" inputmode="numeric"></label><label>너비<input id="bboxWidth" type="number" min="8" step="1" inputmode="numeric"></label><label>높이<input id="bboxHeight" type="number" min="8" step="1" inputmode="numeric"></label><p>얼굴 클릭 후 크기를 맞추세요. 방향키: 이동 · Shift + 방향키: 크기 조정</p></fieldset>
+        <fieldset id="bboxFields" class="bbox-fields" disabled hidden><legend>Face region <span>first frame · px</span></legend><label>X<input id="bboxX" type="number" min="0" step="1" inputmode="numeric"></label><label>Y<input id="bboxY" type="number" min="0" step="1" inputmode="numeric"></label><label>Width<input id="bboxWidth" type="number" min="8" step="1" inputmode="numeric"></label><label>Height<input id="bboxHeight" type="number" min="8" step="1" inputmode="numeric"></label><p>Click the face, then fit the box. Arrows: move · Shift + arrows: resize</p></fieldset>
       </article>
 
       <article class="panel photo-panel">
-        <div class="panel-heading"><div><p class="eyebrow">02 / THE REAL PERSON</p><h2>그 사람의 실제 사진</h2></div><span class="small-tag">별도 사진 1장</span></div>
+        <div class="panel-heading"><div><p class="eyebrow">02 / THE REAL PERSON</p><h2>A real photo of them</h2></div><span class="small-tag">1 separate photo</span></div>
         <div id="photoDrop" class="drop-zone photo-drop">
-          <input id="photoInput" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" aria-label="별도 참조 사진 선택">
-          <div id="photoPlaceholder" class="upload-placeholder"><div class="portrait-icon" aria-hidden="true"><i></i></div><strong>닮음의 기준이 될 사진</strong><p>가능하면 같은 시기의 선명한 얼굴 사진을 쓰세요.</p><button id="choosePhoto" class="button secondary" type="button" disabled>사진 선택 <span aria-hidden="true">↗</span></button></div>
-          <div id="photoView" class="photo-view" hidden><canvas id="photoCanvas" tabindex="0" role="img" aria-label="참조 사진. 사용할 얼굴을 클릭하여 크롭 영역을 정하세요."></canvas></div>
+          <input id="photoInput" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" aria-label="Choose a separate reference photo">
+          <div id="photoPlaceholder" class="upload-placeholder"><div class="portrait-icon" aria-hidden="true"><i></i></div><strong>The photo that anchors the likeness</strong><p>Ideally a sharp face photo from the same period.</p><button id="choosePhoto" class="button secondary" type="button" disabled>Choose photo <span aria-hidden="true">↗</span></button></div>
+          <div id="photoView" class="photo-view" hidden><canvas id="photoCanvas" tabindex="0" role="img" aria-label="Reference photo. Click the face to use to set the crop."></canvas></div>
         </div>
-        <div class="photo-caption"><p id="photoStatus" class="status-line" role="status" aria-live="polite">먼저 원본 영상을 올려주세요.</p><button id="replacePhoto" class="text-button" type="button" hidden>사진 바꾸기</button></div>
-        <p class="quiet-note">복원 대상 영상에서 잘라낸 프레임을 참조 사진으로 사용하지 마세요.</p>
-        <div class="canvas-section"><div class="mini-heading"><h3>자동 생성된 참조 캔버스</h3><span id="canvasState" class="subtle">사진 + 얼굴 위치</span></div><div id="canvasPlaceholder" class="canvas-placeholder"><span aria-hidden="true">+</span><p>영상의 얼굴 위치에<br>사진의 얼굴을 배치합니다.</p></div><img id="referencePreview" class="reference-preview" alt="출력 크기의 회색 캔버스에 선택한 얼굴이 배치된 모습" hidden><button id="retryCanvas" class="text-button" type="button" hidden>캔버스 다시 만들기</button></div>
+        <div class="photo-caption"><p id="photoStatus" class="status-line" role="status" aria-live="polite">Upload the source video first.</p><button id="replacePhoto" class="text-button" type="button" hidden>Replace photo</button></div>
+        <p class="quiet-note">Do not use a frame from the video being restored as the reference photo.</p>
+        <div class="canvas-section"><div class="mini-heading"><h3>Auto-built reference canvas</h3><span id="canvasState" class="subtle">Photo + face position</span></div><div id="canvasPlaceholder" class="canvas-placeholder"><span aria-hidden="true">+</span><p>Places the photo's face<br>at the face position in the video.</p></div><img id="referencePreview" class="reference-preview" alt="The selected face placed on a gray canvas at output size" hidden><button id="retryCanvas" class="text-button" type="button" hidden>Rebuild canvas</button></div>
       </article>
     </section>
 
     <section class="run-panel" aria-labelledby="runHeading">
-      <div class="run-description"><p class="eyebrow">03 / CONTROLLED COMPARISON</p><h2 id="runHeading">같은 seed로 두 번 복원합니다</h2><p>사진 없이 한 번, 사진을 넣고 한 번. 나란히 놓고 차이를 판단하세요.</p></div>
-      <div class="run-options"><label for="preset">시대 프리셋<select id="preset"><option value="vhs_1980s">1980s · VHS 홈 비디오</option><option value="film_1940s">1940s · 필름</option><option value="neutral">중립 · 시대 지정 없음</option></select></label><label for="seed">Seed<input id="seed" type="number" min="0" max="4294967295" step="1" value="42" inputmode="numeric"></label><button id="runButton" class="button primary" type="button" disabled><span id="runLabel">비교 영상 만들기</span><span aria-hidden="true">→</span></button></div>
-      <div class="run-notes"><label class="check-row"><input id="synthetic" type="checkbox"><span>평가를 위해 일부러 열화한 테스트 클립입니다</span></label><p>기본 CFG 1에서는 negative prompt가 적용되지 않습니다.</p></div>
+      <div class="run-description"><p class="eyebrow">03 / CONTROLLED COMPARISON</p><h2 id="runHeading">Two restorations, same seed</h2><p>Once without the photo, once with it. Judge the difference side by side.</p></div>
+      <div class="run-options"><label for="preset">Era preset<select id="preset"><option value="vhs_1980s">1980s · VHS home video</option><option value="film_1940s">1940s · film</option><option value="neutral">Neutral · no era</option></select></label><label for="seed">Seed<input id="seed" type="number" min="0" max="4294967295" step="1" value="42" inputmode="numeric"></label><button id="runButton" class="button primary" type="button" disabled><span id="runLabel">Create comparison</span><span aria-hidden="true">→</span></button></div>
+      <div class="run-notes"><label class="check-row"><input id="synthetic" type="checkbox"><span>This is a deliberately degraded test clip for evaluation</span></label><p>At the default CFG 1 the negative prompt is not applied.</p></div>
     </section>
 
-    <section id="progressSection" class="panel progress-panel" aria-labelledby="progressTitle" hidden><div class="progress-heading"><div><p class="eyebrow">RESTORATION IN PROGRESS</p><h2 id="progressTitle">작업 대기 중</h2></div><span id="progressPercent">0%</span></div><progress id="jobProgress" max="1" value="0" aria-label="복원 진행률"></progress><p id="progressMessage" role="status" aria-live="polite">서버의 진행 상황을 확인합니다.</p><span id="jobId" class="job-id"></span></section>
+    <section id="progressSection" class="panel progress-panel" aria-labelledby="progressTitle" hidden><div class="progress-heading"><div><p class="eyebrow">RESTORATION IN PROGRESS</p><h2 id="progressTitle">Queued</h2></div><span id="progressPercent">0%</span></div><progress id="jobProgress" max="1" value="0" aria-label="Restoration progress"></progress><p id="progressMessage" role="status" aria-live="polite">Checking progress on the server.</p><span id="jobId" class="job-id"></span></section>
 
     <section id="resultsSection" class="results-section" aria-labelledby="resultsHeading" hidden>
-      <div class="results-heading"><div><p class="eyebrow">THE COMPARISON</p><h2 id="resultsHeading">차이를 직접 확인하세요</h2></div><div class="result-badges"><span id="resultMockBadge" class="badge mock-result" hidden>MOCK — input copies, not restored</span><span id="syntheticBadge" class="badge" hidden>일부러 열화한 테스트 클립</span></div></div>
-      <p id="resultNotice" class="result-notice">복원 결과는 생성된 추정입니다. 얼굴과 원본 영상의 세부를 함께 확인하세요.</p>
-      <div id="resultReference" class="result-reference" hidden><img id="resultReferencePhoto" alt="이번 비교에 사용한 별도 실제 사진의 얼굴 크롭"><div><span class="eyebrow">REFERENCE PHOTO</span><strong>사용한 실제 사진</strong><p>이 얼굴과 두 복원 결과를 비교하세요.</p></div></div>
-      <div class="view-tabs" role="tablist" aria-label="비교 보기"><button id="threeWayTab" role="tab" aria-selected="true" aria-controls="threeWayPanel" type="button">3-way 비교</button><button id="wipeTab" role="tab" aria-selected="false" aria-controls="wipePanel" tabindex="-1" type="button">와이프 영상</button></div>
+      <div class="results-heading"><div><p class="eyebrow">THE COMPARISON</p><h2 id="resultsHeading">See the difference yourself</h2></div><div class="result-badges"><span id="resultMockBadge" class="badge mock-result" hidden>MOCK — input copies, not restored</span><span id="syntheticBadge" class="badge" hidden>Deliberately degraded test clip</span></div></div>
+      <p id="resultNotice" class="result-notice">Restorations are generated estimates. Check the face against the original's detail.</p>
+      <div id="resultReference" class="result-reference" hidden><img id="resultReferencePhoto" alt="Face crop of the separate real photo used for this comparison"><div><span class="eyebrow">REFERENCE PHOTO</span><strong>Real photo used</strong><p>Compare both restorations with this face.</p></div></div>
+      <div class="view-tabs" role="tablist" aria-label="Comparison view"><button id="threeWayTab" role="tab" aria-selected="true" aria-controls="threeWayPanel" type="button">3-way compare</button><button id="wipeTab" role="tab" aria-selected="false" aria-controls="wipePanel" tabindex="-1" type="button">Wipe video</button></div>
       <div id="threeWayPanel" role="tabpanel" aria-labelledby="threeWayTab">
-        <div class="comparison-grid"><article class="comparison-card original"><div class="comparison-label"><span>01</span><h3>원본</h3><small>ORIGINAL</small></div><video id="originalVideo" playsinline preload="metadata" muted aria-label="원본 영상"></video></article><article class="comparison-card without"><div class="comparison-label"><span>02</span><h3>사진 없이 복원</h3><small>WITHOUT PHOTO</small></div><video id="withoutVideo" playsinline preload="metadata" muted aria-label="사진 없이 복원한 영상"></video></article><article class="comparison-card with"><div class="comparison-label"><span>03</span><h3>사진 넣고 복원</h3><small>WITH PHOTO</small></div><video id="withVideo" playsinline preload="metadata" muted aria-label="사진을 넣고 복원한 영상"></video></article></div>
-        <div class="shared-controls"><button id="playButton" class="button secondary play-button" type="button" disabled aria-label="세 영상을 함께 재생">재생</button><span id="currentTime" class="time-display">0:00.00</span><label for="scrubber" class="visually-hidden">세 영상의 재생 위치</label><input id="scrubber" type="range" min="0" max="1" step="0.01" value="0" disabled><span id="totalTime" class="time-display">0:00.00</span><button id="muteButton" class="text-button" type="button">음소거 해제</button></div>
-        <p class="player-note">세 영상을 함께 재생합니다. 슬라이더로 같은 시점의 얼굴을 비교하세요.</p>
+        <div class="comparison-grid"><article class="comparison-card original"><div class="comparison-label"><span>01</span><h3>Original</h3><small>ORIGINAL</small></div><video id="originalVideo" playsinline preload="metadata" muted aria-label="Original video"></video></article><article class="comparison-card without"><div class="comparison-label"><span>02</span><h3>Restored without photo</h3><small>WITHOUT PHOTO</small></div><video id="withoutVideo" playsinline preload="metadata" muted aria-label="Video restored without the photo"></video></article><article class="comparison-card with"><div class="comparison-label"><span>03</span><h3>Restored with photo</h3><small>WITH PHOTO</small></div><video id="withVideo" playsinline preload="metadata" muted aria-label="Video restored with the photo"></video></article></div>
+        <div class="shared-controls"><button id="playButton" class="button secondary play-button" type="button" disabled aria-label="Play all three videos">Play</button><span id="currentTime" class="time-display">0:00.00</span><label for="scrubber" class="visually-hidden">Playback position of all three videos</label><input id="scrubber" type="range" min="0" max="1" step="0.01" value="0" disabled><span id="totalTime" class="time-display">0:00.00</span><button id="muteButton" class="text-button" type="button">Unmute</button></div>
+        <p class="player-note">All three play together. Use the slider to compare faces on the same frame.</p>
       </div>
-      <div id="wipePanel" role="tabpanel" aria-labelledby="wipeTab" hidden><video id="wipeVideo" controls playsinline preload="metadata" aria-label="와이프 비교 MP4"></video></div>
-      <div class="downloads"><div><h3>비교 결과 저장</h3><p>영상과 실행 설정을 함께 남기세요.</p></div><div class="download-links"><a id="downloadSideBySide" class="button secondary" download>3-way MP4 <span aria-hidden="true">↓</span></a><a id="downloadWipe" class="button secondary" download>와이프 MP4 <span aria-hidden="true">↓</span></a><a id="downloadManifest" class="text-button" download>실행 기록 JSON ↓</a></div></div>
+      <div id="wipePanel" role="tabpanel" aria-labelledby="wipeTab" hidden><video id="wipeVideo" controls playsinline preload="metadata" aria-label="Wipe comparison MP4"></video></div>
+      <div class="downloads"><div><h3>Save the comparison</h3><p>Keep the videos together with the run settings.</p></div><div class="download-links"><a id="downloadSideBySide" class="button secondary" download>3-way MP4 <span aria-hidden="true">↓</span></a><a id="downloadWipe" class="button secondary" download>Wipe MP4 <span aria-hidden="true">↓</span></a><a id="downloadManifest" class="text-button" download>Run record JSON ↓</a></div></div>
       <p id="playerStatus" class="status-line" role="status"></p>
     </section>
   </main>
-  <footer><span>FaceTrue Restore</span><p>한 사람 · 짧은 클립 · 고정 구도. 사진의 효과는 결과를 보고 판단합니다.</p><a href="https://github.com/junjunjunbong/facetrue-restore" target="_blank" rel="noopener noreferrer">프로젝트 ↗</a></footer>
+  <footer><span>FaceTrue Restore</span><p>One person · short clip · steady framing. Judge the photo's effect from the results.</p><a href="https://github.com/junjunjunbong/facetrue-restore" target="_blank" rel="noopener noreferrer">Project ↗</a></footer>
 </body>
 </html>

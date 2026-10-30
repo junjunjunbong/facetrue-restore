@@ -1,0 +1,36 @@
+{
+ "pd-obama": {
+  "clean": {
+   "terr": 1.223
+  },
+  "without_reference": {
+   "terr": 1.476,
+   "lpips": 0.1449
+  },
+  "correct_reference": {
+   "terr": 1.762,
+   "lpips": 0.1491
+  },
+  "wrong_reference": {
+   "terr": 1.654,
+   "lpips": 0.1807
+  }
+ },
+ "pd-michelle": {
+  "clean": {
+   "terr": 0.753
+  },
+  "without_reference": {
+   "terr": 0.773,
+   "lpips": 0.2257
+  },
+  "correct_reference": {
+   "terr": 1.012,
+   "lpips": 0.229
+  },
+  "wrong_reference": {
+   "terr": 0.986,
+   "lpips": 0.2372
+  }
+ }
+}

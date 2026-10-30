@@ -26,6 +26,8 @@ Built for the [Comfy Open Source Higgsfield challenge](https://comfy.org/open-so
 - **GPU memory:** the sampled whole-device peak was about 31.9-32.1 GB across the pilot runs (`nvidia-smi` polling). This is not an exact model allocation. GPU-PC system RAM was not measured.
 - **Photo effect:** see [Pilot results](#pilot-results-small-test). It is a small test with synthetic damage and one seed, not a benchmark.
 
+The full numbers, a second seed, the ablations and the negative results are in the [technical report](docs/TECHNICAL_REPORT.md).
+
 Run the [GPU preflight](docs/GPU_PREFLIGHT.md) on your own hardware before relying on these numbers.
 
 MVP scope: one person, preferably 4-10 seconds, with little camera or face movement. Face tracking, reference relocation between windows, multiple people, and clips beyond ten seconds are not implemented.
@@ -179,7 +181,7 @@ Media, outputs, model weights, `.env`, caches and local evaluation records are g
 
 Generative output may change identity, expression, age, color or objects. Fixed reference placement can become wrong as a person moves. Chunk boundaries can flicker. The app checks frame accounting, but visual seam quality still needs inspection on your own footage. The photo's effect has only been measured in the small pilot above.
 
-[Development plan](docs/PLAN.md) · [GPU preflight](docs/GPU_PREFLIGHT.md) · [Evaluation](docs/EVALUATION.md) · [Demo plan](docs/DEMO.md) · [Sample provenance](samples/README.md)
+[Technical report](docs/TECHNICAL_REPORT.md) · [Research notes](docs/RESEARCH_NOTES.md) · [Improvement plan](docs/IMPROVEMENT_PLAN.md) · [Development plan](docs/PLAN.md) · [GPU preflight](docs/GPU_PREFLIGHT.md) · [Evaluation](docs/EVALUATION.md) · [Demo plan](docs/DEMO.md) · [Sample provenance](samples/README.md)
 
 ## Challenge submission
 

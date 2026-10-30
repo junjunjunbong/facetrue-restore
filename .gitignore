@@ -36,3 +36,6 @@ node_modules/
 *.gif
 *.zip
 *.log
+
+# Report charts (small matplotlib bar charts, no faces)
+!docs/img/report_*.png

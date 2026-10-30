@@ -1,0 +1,293 @@
+{
+  "version": 1,
+  "status": "complete",
+  "backend_mode": "comfy",
+  "backend_class": "ComfyBackend",
+  "synthetically_degraded": true,
+  "evidence_kind": "real_model_pilot",
+  "settings": {
+    "width": 1280,
+    "height": 736,
+    "fps": 24,
+    "frame_count": 97,
+    "sample_every": 8,
+    "seed": 42,
+    "steps": 8,
+    "min_common_coverage": 0.8
+  },
+  "model_specs": {
+    "yunet": {
+      "filename": "face_detection_yunet_2023mar.onnx",
+      "sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+      "bytes": 232589,
+      "url": "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx",
+      "license": "MIT",
+      "license_url": "https://github.com/opencv/opencv_zoo/blob/main/models/face_detection_yunet/LICENSE"
+    },
+    "sface": {
+      "filename": "face_recognition_sface_2021dec.onnx",
+      "sha256": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
+      "bytes": 38696353,
+      "url": "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/face_recognition_sface/face_recognition_sface_2021dec.onnx",
+      "license": "Apache-2.0 (official distribution); training-data provenance unconfirmed",
+      "license_url": "https://github.com/opencv/opencv_zoo/blob/main/models/face_recognition_sface/LICENSE"
+    }
+  },
+  "manifest_sha256": "3161779f0efec19aa2ebe9b75eac27d437559d6093a0d598af5804b9c5e7094b",
+  "manifest": {
+    "version": 1,
+    "seed": 42,
+    "steps": 8,
+    "width": 1280,
+    "height": 736,
+    "fps": 24,
+    "frame_count": 97,
+    "sample_every": 8,
+    "min_common_coverage": 0.8,
+    "clips": [
+      {
+        "id": "pd-obama",
+        "hq_video": "obama-hq.mp4",
+        "reference": "src/obama-photo.jpg",
+        "wrong_reference": "src/pence-photo.jpg",
+        "identity_id": "obama",
+        "wrong_identity_id": "mike-pence",
+        "independent_reference_confirmed": true,
+        "reference_origin": "Official White House portrait by Pete Souza, 2012-12-06; separate photograph, not a video frame",
+        "source_rights": "Clip: https://commons.wikimedia.org/wiki/File:2013-09-28_President_Obama%27s_Weekly_Address_HD.webm (Public domain, The White House, US federal work), trimmed 295.5s+11s. Photo: https://commons.wikimedia.org/wiki/File:President_Barack_Obama.jpg (Public domain). Wrong photo: https://commons.wikimedia.org/wiki/File:Mike_Pence_official_Vice_Presidential_portrait.jpg (Public domain, D. Myles Cullen)",
+        "face_bbox": {
+          "x": 533,
+          "y": 97,
+          "width": 203,
+          "height": 292
+        }
+      },
+      {
+        "id": "pd-michelle",
+        "hq_video": "michelle-hq.mp4",
+        "reference": "src/michelle-photo.jpg",
+        "wrong_reference": "src/harris-photo.jpg",
+        "identity_id": "michelle",
+        "wrong_identity_id": "kamala-harris",
+        "independent_reference_confirmed": true,
+        "reference_origin": "Official White House portrait by Chuck Kennedy, 2013-02-12; separate photograph, not a video frame",
+        "source_rights": "Clip: https://commons.wikimedia.org/wiki/File:Weekly_Address-_The_First_Lady_Marks_Mother%27s_Day_and_Speaks_Out_on_the_Tragic_Kidnapping_in_Nigeria.webm (Public domain, The White House, 2014-05-10), trimmed 277.5s+11s. Photo: https://commons.wikimedia.org/wiki/File:Michelle_Obama_2013_official_portrait.jpg (Public domain). Wrong photo: https://commons.wikimedia.org/wiki/File:Kamala_Harris_Vice_Presidential_Portrait_(cropped).jpg (Public domain, Lawrence Jackson)",
+        "face_bbox": {
+          "x": 471,
+          "y": 160,
+          "width": 223,
+          "height": 309
+        }
+      }
+    ]
+  },
+  "degradation": {
+    "downscale_divisor": 4,
+    "gaussian_sigma": 1.2,
+    "h264_crf": 32
+  },
+  "metric": "SFace cosine to corresponding clean HQ frame, paired common timestamps",
+  "limitations": [
+    "Cosine is a diagnostic, not proof of faithful reconstruction.",
+    "Separate-capture provenance is operator-confirmed; hashes cannot establish identity.",
+    "Nearby video frames are not independent statistical samples."
+  ],
+  "clips": [
+    {
+      "id": "pd-obama",
+      "status": "pilot_result",
+      "report": {
+        "conditions": [
+          {
+            "condition": "without_reference",
+            "sampled_frames": 13,
+            "valid_frames": 13,
+            "common_valid_frames": 13,
+            "common_coverage": 1.0,
+            "failure_reasons": {},
+            "status": "pilot_result",
+            "gt_cosine_mean": 0.7276603303887609,
+            "gt_cosine_median": 0.7273070983782496,
+            "correct_photo_cosine_mean": 0.6309457669735967,
+            "wrong_photo_cosine_mean": 0.25909429623441915
+          },
+          {
+            "condition": "correct_reference",
+            "sampled_frames": 13,
+            "valid_frames": 13,
+            "common_valid_frames": 13,
+            "common_coverage": 1.0,
+            "failure_reasons": {},
+            "status": "pilot_result",
+            "gt_cosine_mean": 0.861835611067071,
+            "gt_cosine_median": 0.8580336754286501,
+            "correct_photo_cosine_mean": 0.7923965933261038,
+            "wrong_photo_cosine_mean": 0.1771728781124883
+          },
+          {
+            "condition": "wrong_reference",
+            "sampled_frames": 13,
+            "valid_frames": 13,
+            "common_valid_frames": 13,
+            "common_coverage": 1.0,
+            "failure_reasons": {},
+            "status": "pilot_result",
+            "gt_cosine_mean": 0.707180408279415,
+            "gt_cosine_median": 0.6990641026243594,
+            "correct_photo_cosine_mean": 0.6048813114294631,
+            "wrong_photo_cosine_mean": 0.33847087371543577
+          }
+        ],
+        "common_frame_indices": [
+          0,
+          8,
+          16,
+          24,
+          32,
+          40,
+          48,
+          56,
+          64,
+          72,
+          80,
+          88,
+          96
+        ],
+        "paired_deltas": {
+          "correct_minus_without": 0.13417528067831008,
+          "correct_minus_wrong": 0.154655202787656
+        },
+        "status": "pilot_result",
+        "min_common_coverage": 0.8
+      },
+      "source_hashes": {
+        "hq_video": "fb5b7648f239dd7afad1b700850ec97160ff2cb094fee26f8437087dbe880c49",
+        "reference": "744dd848fbb0584229169e01c4944664957c62495fb9e8af514a088ebca43e19",
+        "wrong_reference": "6c5524c7cbe5b5733031431fe9285b395d6e3f5952106ee638ee5b077b214207"
+      },
+      "normalized_hq_sha256": "101df2fc3b3c07e09658c4d143035d11d8982dc9715499f078578e664b2bf360",
+      "degraded_sha256": "1b918d7f73ae602b5e77a1c55c2f3a76abc1d913a226c677f68fc109ce133fe1",
+      "outputs": {
+        "without_reference": {
+          "path": "/Users/junwon/Hackathon/facetrue-restore/data/eval-pd/tune5/runs/adv_mask15_s42/pd-obama/without_reference.mp4",
+          "sha256": "3142d96b1c45278d05958f8c7c186db135deca1f8d8487be6beb6b0c4e01564b"
+        },
+        "correct_reference": {
+          "path": "/Users/junwon/Hackathon/facetrue-restore/data/eval-pd/tune5/runs/adv_mask15_s42/pd-obama/correct_reference.mp4",
+          "sha256": "d900a517c5d3c44d01b80d4fe9d7b12270e6e8531a4aa61421bfaa45f1a52616"
+        },
+        "wrong_reference": {
+          "path": "/Users/junwon/Hackathon/facetrue-restore/data/eval-pd/tune5/runs/adv_mask15_s42/pd-obama/wrong_reference.mp4",
+          "sha256": "8abf39ab644c15b6e502ba53308799f8a2c91e41b2703d27a4a773a0e069142b"
+        }
+      }
+    },
+    {
+      "id": "pd-michelle",
+      "status": "pilot_result",
+      "report": {
+        "conditions": [
+          {
+            "condition": "without_reference",
+            "sampled_frames": 13,
+            "valid_frames": 13,
+            "common_valid_frames": 13,
+            "common_coverage": 1.0,
+            "failure_reasons": {},
+            "status": "pilot_result",
+            "gt_cosine_mean": 0.7728106564592518,
+            "gt_cosine_median": 0.7748116162386726,
+            "correct_photo_cosine_mean": 0.5387376073451832,
+            "wrong_photo_cosine_mean": 0.09407183758972078
+          },
+          {
+            "condition": "correct_reference",
+            "sampled_frames": 13,
+            "valid_frames": 13,
+            "common_valid_frames": 13,
+            "common_coverage": 1.0,
+            "failure_reasons": {},
+            "status": "pilot_result",
+            "gt_cosine_mean": 0.8105316940729286,
+            "gt_cosine_median": 0.817724432350963,
+            "correct_photo_cosine_mean": 0.6425129730011828,
+            "wrong_photo_cosine_mean": 0.12773548622585762
+          },
+          {
+            "condition": "wrong_reference",
+            "sampled_frames": 13,
+            "valid_frames": 13,
+            "common_valid_frames": 13,
+            "common_coverage": 1.0,
+            "failure_reasons": {},
+            "status": "pilot_result",
+            "gt_cosine_mean": 0.7906687917753048,
+            "gt_cosine_median": 0.7904664375018037,
+            "correct_photo_cosine_mean": 0.5415437834058923,
+            "wrong_photo_cosine_mean": 0.252523543251921
+          }
+        ],
+        "common_frame_indices": [
+          0,
+          8,
+          16,
+          24,
+          32,
+          40,
+          48,
+          56,
+          64,
+          72,
+          80,
+          88,
+          96
+        ],
+        "paired_deltas": {
+          "correct_minus_without": 0.03772103761367673,
+          "correct_minus_wrong": 0.019862902297623775
+        },
+        "status": "pilot_result",
+        "min_common_coverage": 0.8
+      },
+      "source_hashes": {
+        "hq_video": "9a2fb1cd6c845b53ce95682ea2b7b95d34b687ca7989f8c9a121d9d76d0da563",
+        "reference": "fa3d0588071df873142d916328e16fd856d7d96dcd4d8dbffb7c28b1bf7f1cde",
+        "wrong_reference": "d94d46174d4b9c329e4c143f2e786a59b75218e36650eeb4098eb1217deebdc6"
+      },
+      "normalized_hq_sha256": "bf1f1e1dfae0a1627fc10c6215df7e361105980c03f0feb750ddeb6251f35df7",
+      "degraded_sha256": "03d701061fa395c4ba8588ffd5fc970dd7c0f32bee2c2be5e49e7a89ae68d885",
+      "outputs": {
+        "without_reference": {
+          "path": "/Users/junwon/Hackathon/facetrue-restore/data/eval-pd/tune5/runs/adv_mask15_s42/pd-michelle/without_reference.mp4",
+          "sha256": "5d169f3cdc1518400f37d1f2ff98fcfcd854159d6b4951a74e993a579360271e"
+        },
+        "correct_reference": {
+          "path": "/Users/junwon/Hackathon/facetrue-restore/data/eval-pd/tune5/runs/adv_mask15_s42/pd-michelle/correct_reference.mp4",
+          "sha256": "1d888a8225ce5a1c1476f10f993c083c6a2078682dd22053bcb3af9612f64b8b"
+        },
+        "wrong_reference": {
+          "path": "/Users/junwon/Hackathon/facetrue-restore/data/eval-pd/tune5/runs/adv_mask15_s42/pd-michelle/wrong_reference.mp4",
+          "sha256": "4bb57b06094fb3fa280812cb3972672cb4faa06d369a55e64ac443f04f0e845f"
+        }
+      }
+    }
+  ],
+  "tuning": {
+    "name": "adv_mask15_s42",
+    "manifest": "m42_om.json",
+    "adv": true,
+    "mask": true,
+    "mask_grow": 1.5,
+    "mask_feather": 0.1,
+    "reuse_without": "run-97-strong"
+  },
+  "render_seconds": {
+    "pd-obama/without_reference": 0.0,
+    "pd-obama/correct_reference": 73.4,
+    "pd-obama/wrong_reference": 68.3,
+    "pd-michelle/without_reference": 0.0,
+    "pd-michelle/correct_reference": 72.8,
+    "pd-michelle/wrong_reference": 68.1
+  },
+  "wall_seconds": 288.7
+}

@@ -1,0 +1,30 @@
+{
+ "version": 1,
+ "seed": 42,
+ "steps": 8,
+ "width": 1280,
+ "height": 736,
+ "fps": 24,
+ "frame_count": 97,
+ "sample_every": 8,
+ "min_common_coverage": 0.8,
+ "clips": [
+  {
+   "id": "pd-obama",
+   "hq_video": "obama-hq.mp4",
+   "reference": "src/obama-photo.jpg",
+   "wrong_reference": "src/pence-photo.jpg",
+   "identity_id": "obama",
+   "wrong_identity_id": "mike-pence",
+   "independent_reference_confirmed": true,
+   "reference_origin": "Official White House portrait by Pete Souza, 2012-12-06; separate photograph, not a video frame",
+   "source_rights": "Clip: https://commons.wikimedia.org/wiki/File:2013-09-28_President_Obama%27s_Weekly_Address_HD.webm (Public domain, The White House, US federal work), trimmed 295.5s+11s. Photo: https://commons.wikimedia.org/wiki/File:President_Barack_Obama.jpg (Public domain). Wrong photo: https://commons.wikimedia.org/wiki/File:Mike_Pence_official_Vice_Presidential_portrait.jpg (Public domain, D. Myles Cullen)",
+   "face_bbox": {
+    "x": 533,
+    "y": 97,
+    "width": 203,
+    "height": 292
+   }
+  }
+ ]
+}

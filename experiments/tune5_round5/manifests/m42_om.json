@@ -1,0 +1,47 @@
+{
+ "version": 1,
+ "seed": 42,
+ "steps": 8,
+ "width": 1280,
+ "height": 736,
+ "fps": 24,
+ "frame_count": 97,
+ "sample_every": 8,
+ "min_common_coverage": 0.8,
+ "clips": [
+  {
+   "id": "pd-obama",
+   "hq_video": "obama-hq.mp4",
+   "reference": "src/obama-photo.jpg",
+   "wrong_reference": "src/pence-photo.jpg",
+   "identity_id": "obama",
+   "wrong_identity_id": "mike-pence",
+   "independent_reference_confirmed": true,
+   "reference_origin": "Official White House portrait by Pete Souza, 2012-12-06; separate photograph, not a video frame",
+   "source_rights": "Clip: https://commons.wikimedia.org/wiki/File:2013-09-28_President_Obama%27s_Weekly_Address_HD.webm (Public domain, The White House, US federal work), trimmed 295.5s+11s. Photo: https://commons.wikimedia.org/wiki/File:President_Barack_Obama.jpg (Public domain). Wrong photo: https://commons.wikimedia.org/wiki/File:Mike_Pence_official_Vice_Presidential_portrait.jpg (Public domain, D. Myles Cullen)",
+   "face_bbox": {
+    "x": 533,
+    "y": 97,
+    "width": 203,
+    "height": 292
+   }
+  },
+  {
+   "id": "pd-michelle",
+   "hq_video": "michelle-hq.mp4",
+   "reference": "src/michelle-photo.jpg",
+   "wrong_reference": "src/harris-photo.jpg",
+   "identity_id": "michelle",
+   "wrong_identity_id": "kamala-harris",
+   "independent_reference_confirmed": true,
+   "reference_origin": "Official White House portrait by Chuck Kennedy, 2013-02-12; separate photograph, not a video frame",
+   "source_rights": "Clip: https://commons.wikimedia.org/wiki/File:Weekly_Address-_The_First_Lady_Marks_Mother%27s_Day_and_Speaks_Out_on_the_Tragic_Kidnapping_in_Nigeria.webm (Public domain, The White House, 2014-05-10), trimmed 277.5s+11s. Photo: https://commons.wikimedia.org/wiki/File:Michelle_Obama_2013_official_portrait.jpg (Public domain). Wrong photo: https://commons.wikimedia.org/wiki/File:Kamala_Harris_Vice_Presidential_Portrait_(cropped).jpg (Public domain, Lawrence Jackson)",
+   "face_bbox": {
+    "x": 471,
+    "y": 160,
+    "width": 223,
+    "height": 309
+   }
+  }
+ ]
+}

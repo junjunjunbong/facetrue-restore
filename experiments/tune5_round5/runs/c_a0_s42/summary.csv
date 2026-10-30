@@ -1,0 +1,4 @@
+clip_id,seed,condition,sampled_frames,valid_frames,common_valid_frames,common_coverage,failure_reasons,status,gt_cosine_mean,gt_cosine_median,correct_photo_cosine_mean,wrong_photo_cosine_mean,correct_minus_without,correct_minus_wrong
+pd-obama,42,without_reference,13,13,13,1.0,{},pilot_result,0.7276603303887609,0.7273070983782496,0.6309457669735967,0.25909429623441915,0.13304453763092017,0.1670462559500363
+pd-obama,42,correct_reference,13,13,13,1.0,{},pilot_result,0.860704868019681,0.8624630674850343,0.7939879104514337,0.17776297914123484,0.13304453763092017,0.1670462559500363
+pd-obama,42,wrong_reference,13,13,13,1.0,{},pilot_result,0.6936586120696447,0.6862383356343867,0.5853011823094646,0.353515990314655,0.13304453763092017,0.1670462559500363

@@ -1,7 +1,10 @@
 # Validation record
 
-This record separates software verification from model-quality evidence.
-No successful LTX GPU restoration or measured identity improvement is recorded.
+This is the earlier development-Mac snapshot, before the 2026-10-29 GPU runs.
+It separates software verification from model-quality evidence; the unverified
+items below describe that point in time. Subsequent 49-, 97-, and 240-frame
+GPU runs and a small controlled photo pilot are recorded in
+[GPU_PREFLIGHT.md](GPU_PREFLIGHT.md) and [TECHNICAL_REPORT.md](TECHNICAL_REPORT.md).
 
 ## Completed on the development Mac
 
@@ -46,7 +49,7 @@ python scripts/smoke_ui.py \
 Run that command in the environment where Playwright is installed. The app's
 `.venv` must already exist. No normal browser profile or signed-in session is used.
 
-## Still unverified
+## Not yet verified at the time of this snapshot
 
 - GPU-PC endpoint and installed source/model environment. The Mac had no `.env`
   or `COMFYUI_URL` configured during this development run.
@@ -58,7 +61,7 @@ Run that command in the environment where Playwright is installed. The app's
 - Identity fidelity, temporal seam quality, color accuracy or historical truth.
 - An actual final demo recording and submission URLs.
 
-Use [GPU_PREFLIGHT.md](GPU_PREFLIGHT.md) for the next checks and
-[EVALUATION.md](EVALUATION.md) for the controlled experiment. The project's
-continuation gate in [PLAN.md](PLAN.md) remains open until those results exist.
-No mock output or unit-test fixture should be used to fill that gate.
+Use [GPU_PREFLIGHT.md](GPU_PREFLIGHT.md) to repeat hardware checks and
+[EVALUATION.md](EVALUATION.md) for the controlled experiment. The subsequent
+continuation decision is recorded in [PLAN.md](PLAN.md). Mock output and
+unit-test fixtures are not evidence of restoration quality.

@@ -34,7 +34,7 @@ The graph is Lightricks' Restore workflow, adapted as described in [workflows/PR
 
 ### 2.2 Reference canvas
 
-The user clicks the person's face on the normalized first frame (a bounding box in output pixels). They then supply a separate photo and confirm the face crop in it. `app/reference.py` builds an output-sized canvas filled with gray (128,128,128) and pastes the photo's face crop into the selected box. The canvas is fed through `LTXVAddGuide` at strength 1.0, the maximum, as an extra guide image. The photo is therefore a placed hint, not a frame of the video. The no-photo arm runs the same graph with the photo guide node removed.
+The user clicks the person's face on the normalized first frame (a bounding box in output pixels). They then supply a separate photo and confirm the face crop in it. `app/reference.py` builds an output-sized canvas filled with gray (128,128,128) and pastes the photo's face crop into the selected box. The canvas is fed through `LTXAddVideoICLoRAGuide` at `frame_idx=-1` and strength 1.0 as an extra guide image. The photo is therefore a placed hint, not a frame of the video. The no-photo arm runs the same graph with the photo guide node removed. The separate `LTXVAddGuide` node supplies the preceding window's restored frames during chaining.
 
 ### 2.3 Windows and chaining
 

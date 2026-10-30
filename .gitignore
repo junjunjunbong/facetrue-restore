@@ -41,3 +41,7 @@ node_modules/
 !docs/img/report_*.png
 # README comparison GIF (fictional person, no real people)
 !docs/img/readme_wipe_synthetic.gif
+# README workspace screenshot (empty mock-mode app)
+!docs/img/readme_app.png
+# Generated brand artwork used by the README
+!docs/img/facetrue_cover.png

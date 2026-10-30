@@ -1,6 +1,6 @@
 # GPU setup, model files and licenses
 
-Sources below were inspected on 2026-10-27. These are source-contract pins and published model recommendations. They are **not a recorded successful RTX 5090 environment**. Complete [GPU_PREFLIGHT.md](GPU_PREFLIGHT.md) before describing the configuration as tested.
+Sources below were inspected on 2026-10-27; the source revisions are contract pins and published model recommendations. Subsequent RTX 5090 results are recorded in [GPU_PREFLIGHT.md](GPU_PREFLIGHT.md) and the [technical report](TECHNICAL_REPORT.md). The available records do not establish that the recorded GPU environment used these exact source revisions. Run the preflight on your own setup.
 
 ## 1. ComfyUI on the GPU PC
 
@@ -45,7 +45,7 @@ First review the access conditions and license on both [LTX-2.5](https://hugging
 | `Lightricks/LTX-2.5` / `vae/ltx-2.5-video-vae-conv-bf16.safetensors` | `models/vae/ltx-2.5-video-vae-conv-bf16.safetensors` |
 | `Lightricks/LTX-2.5-22b-IC-LoRA-Restore` / `ltx-2.5-22b-ic-lora-restore-1.0.safetensors` | `models/loras/ltx-2.5-22b-ic-lora-restore-1.0.safetensors` |
 
-These filenames and destinations follow [the official lower-VRAM file list](https://docs.ltx.io/open-source-model/integration-tools/comfy-ui#lower-vram-model-files) and [Restore's card](https://huggingface.co/Lightricks/LTX-2.5-22b-IC-LoRA-Restore). The gated file bytes were not downloaded during development; their local hashes and revisions must be recorded during installation.
+These filenames and destinations follow [the official lower-VRAM file list](https://docs.ltx.io/open-source-model/integration-tools/comfy-ui#lower-vram-model-files) and [Restore's card](https://huggingface.co/Lightricks/LTX-2.5-22b-IC-LoRA-Restore). The gated file bytes were not downloaded during the original source inspection; record the local hashes and revisions for your installation.
 
 After the account holder has granted access, the following commands can be run **inside `ComfyUI/`** using the official Hugging Face CLI:
 
@@ -69,7 +69,7 @@ Restart ComfyUI after installation. From the ComfyUI environment, a launch confi
 python main.py --listen 0.0.0.0 --port 8188 --lowvram
 ```
 
-Use the GPU PC's trusted LAN/VPN address in the Mac's `COMFYUI_URL`. Keep the Mac proxy on `127.0.0.1:8189`. Offload and `--lowvram` can trade speed for memory; record the actual flags and measurements. No tested peak-memory or speed figure is currently available.
+Use the GPU PC's trusted LAN/VPN address in the Mac's `COMFYUI_URL`. Keep the Mac proxy on `127.0.0.1:8189`. Offload and `--lowvram` can trade speed for memory; record the actual flags and measurements. For the project's observed wall times and sampled whole-device VRAM, see [GPU_PREFLIGHT.md](GPU_PREFLIGHT.md#3-measure-time-and-memory-honestly).
 
 ## 3. Configuration contract
 

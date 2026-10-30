@@ -1,8 +1,8 @@
 # RTX 5090 preflight and evidence record
 
-**Status: real GPU inference has not been recorded.** Passing CPU tests or the mock UI flow does not establish that LTX fits in 32GB, finishes a clip, or benefits from the photograph. This procedure records those separate checks without filling in invented results.
+**Recorded status:** on 2026-10-29, 49-, 97-, and 240-frame jobs completed on one RTX 5090 using ComfyUI `--lowvram`. A separate three-clip photo pilot was also recorded. The observations and their limits are below and in the [technical report](TECHNICAL_REPORT.md). Passing CPU tests or the mock UI flow does not establish that LTX will fit or improve a particular clip on another setup.
 
-The planned gate is defined in [PLAN.md](PLAN.md): complete 49 frames, 97 frames and a ten-second clip, then evaluate three controlled clips. The target configuration is one RTX 5090 32GB, the official INT8 transformer + INT8 Gemma + Conv VAE path, and offload if needed. Peak system RAM and render speed remain unmeasured.
+The original gate is defined in [PLAN.md](PLAN.md): complete 49 frames, 97 frames and a ten-second clip, then evaluate three controlled clips. The recorded configuration used one RTX 5090 32GB, the INT8 transformer + INT8 Gemma + Conv VAE path, and `--lowvram`. Wall times and sampled whole-device VRAM for the pilot are reported in section 3; GPU-PC system RAM and per-stage timings were not measured. This procedure can be repeated on your own hardware.
 
 ## 1. Confirm the environment
 
@@ -123,4 +123,4 @@ For a published demo of the deliberately degraded input, use `scripts/restore.py
 - A completed 240-frame job with correct counts supports the implemented short-clip chain on that input.
 - Paired score differences and visual inspection describe the tested clips; they do not prove historical truth or unrestricted reliability.
 
-The project's continuation decision remains the explicit gate in [PLAN.md](PLAN.md). If the correct photo does not consistently help, record that result and reduce the product claim. Do not fill a comparison slot with an unrelated result or remove failed clips from the pilot without disclosure.
+The project's original continuation decision is recorded in [PLAN.md](PLAN.md). For a new pilot, record negative or mixed outcomes as well as positive ones. Do not fill a comparison slot with an unrelated result or remove failed clips from the pilot without disclosure.

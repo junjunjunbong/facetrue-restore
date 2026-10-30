@@ -2,7 +2,7 @@
 
 This script makes a reproducibly degraded input from a clean clip, renders **without a photo / with the correct photo / with a different person's photo**, and compares all outputs against the corresponding clean frames. It reports the measured values even when the photo hurts the result.
 
-The score is an identity diagnostic. It does not establish that generated details are historically accurate. Three clips constitute a pilot, not general evidence of reliable identity restoration. No scores have been prefilled in this repository.
+The score is an identity diagnostic. It does not establish that generated details are historically accurate. Three clips constitute a pilot, not general evidence of reliable identity restoration. The example manifest below contains no prefilled scores; the later pilot results are in the [technical report](TECHNICAL_REPORT.md).
 
 ## Inputs
 

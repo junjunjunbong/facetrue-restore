@@ -14,16 +14,16 @@ This plan turns the [research notes](RESEARCH_NOTES.md) into a short list of exp
 2. Correct > wrong for every person at every seed.
 3. No pop at the first frame or at window seams; mouth and eye motion preserved.
 4. The absolute correct-arm score must rise. A gain that comes only from a worse no-photo arm is not an improvement.
-5. Reject if face LPIPS worsens by 0.02 or more.
+5. Reject if face LPIPS worsens by 0.02 or more, or motion-compensated temporal error rises by 10% or more (after a visual re-check).
 
 ## 2. Experiments, in order
 
 | Step | Experiment | What it does | Stop rule |
 |---|---|---|---|
 | M | Michelle diagnosis (no GPU) | Similarity of Michelle's photo to the 13 clean frames; gain broken down by pose and expression | — |
-| A | Photo attention mask | Use `LTXAddVideoICLoRAGuideAdvanced` with the photo's face region at 1 and the gray background at 0 (soft edge). First check the node is installed. | Stop if it can't be made to work within 45 min. Don't expand if a 2-person screening gains ≤ +0.01. |
-| B | Photo-aware keyframe (Qwen-Image-Edit-2511, Apache-2.0) | Degraded frame 0 (for pose) + photo (for identity) → new frame 0 → LTX keyframe at strength 0.8. Generate separately for none / correct / wrong arms. | Stop if download or compatibility takes more than 45 min. Discard if mouth or gaze changes. Reject on any pop. |
-| C | Reference-only guidance (if time remains) | Amplify the photo / no-photo prediction difference by 0.25× on steps 5–7 | Stop if α = 0 can't reproduce the baseline within 45 min. |
+| A | Photo attention mask | Use `LTXAddVideoICLoRAGuideAdvanced` with the photo's face region at 1 and the gray background at 0 (soft edge). First check the node is installed. Run the masked path on PyTorch SDPA, not SageAttention. Optional follow-up: photo-only attention strength 1.25 / 1.5 through a small custom conditioning node, with LoRA weight and guide strength unchanged. | Stop if it can't be made to work within 45 min. Don't expand if a 2-person screening gains ≤ +0.01. Discard if the face takes the photo's pose or the mouth freezes. |
+| B | Photo-aware keyframe (Qwen-Image-Edit-2511, Apache-2.0) | Degraded frame 0 (for pose) + photo (for identity) → new frame 0 → LTX keyframe at strength 0.8 (0.6 once if it pops). Generate separately for none / correct / wrong arms. Use `qwen_image_edit_2511_fp8mixed` with LTX unloaded, a 512–768 px face crop, 40 steps, true CFG 4.0, no Lightning LoRA; the exact prompt is in the research notes. | Stop if download or compatibility takes more than 45 min. Discard if mouth or gaze changes. Don't expand if the final video gains < +0.02 over the current correct arm. Reject on any pop. |
+| C | Reference-only guidance (if time remains) | Amplify the photo / no-photo prediction difference by α = 0.25 on steps 5–7 inside a soft face mask (last step unchanged; try α = 0.5 once if clean). Two sequential forwards; 8 → 11 denoiser calls. | Stop if α = 0 can't reproduce the baseline within 45 min. Discard if the gain is ≤ +0.01 or color, pose or expression artifacts appear. |
 | Decision | — | Adopt anything that passes the bar; otherwise keep the current version. | — |
 
 For any pair of changes that both pass screening, run the 2×2 interaction check described in the research notes before combining them.

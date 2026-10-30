@@ -1,98 +1,87 @@
-# FaceTrue Restore: 2-minute demo script
+# FaceTrue Restore: 2-minute demo script (v3)
 
-The target is a final video of **115-118 s, with a hard limit of 120 s**. It is built around two finished comparison clips from a real GPU run, plus screen captures of the web UI that still need to be recorded (see [Shots still to record](#shots-still-to-record)).
+The final video must be **120 s or less**. Draft v3 is **107.2 s**, 1920×1080, 24 fps, H.264, silent (all narration is on-screen text).
+
+**No real people appear in the demo.** The challenge agreement asks for no real people's likenesses without permission, so every face in the video is a **fictional person generated locally with open-weights LTX-2.5 22B**. Each segment that shows a face carries the caption:
+
+> Fictional person generated with open models. Not a real individual.
+
+The public-domain clips of real people (see [Benchmark sources](#benchmark-sources-not-shown-in-the-demo)) are used only for the measurements in [TECHNICAL_REPORT.md](TECHNICAL_REPORT.md). The demo shows their aggregate numbers as text only.
 
 ## What the demo may claim
 
-These are the only results we can stand behind. They come from a small pilot run: three clips, one seed (42), 97 frames each, with LTX-2.5 22B + Restore IC-LoRA (8 steps) on one RTX 5090.
+### Fictional grandma clip (shown in the demo)
 
-- **Material:** public-domain White House weekly-address footage of Barack Obama, Joe Biden and Michelle Obama. A separate official portrait of each person was used as the reference photo, and a different person's portrait was used as a control.
-- **Damage was synthetic.** The clean clips were degraded on purpose to look like old VHS. This is not recovered tape.
-- **Damage recipe:** downscale to 1/5 size, Gaussian blur σ1.0, upscale with bicubic, reduce saturation to 0.25, lower the contrast, shift the chroma, add temporal grain, encode with H.264 CRF 36.
-  - This recipe was applied by a local wrapper around `scripts/evaluate.py` and is not in the repository.
-  - The repository default is milder.
-- **Measurement:** SFace face-embedding cosine against the clean original, on 13 sampled frames per clip. A face was detected in every sampled frame of every condition.
+- **Material:** a wide shot of a fictional elderly woman (`grandmaW_A_s11`, text-to-video, LTX-2.5 22B distilled, no LoRA).
+  - Reference photo: frame 72 of a **separate** image-to-video close-up (`grandmaW_B_s23`), seeded from frame 120 of the wide clip, outside the evaluated frames 0-96. It is not a frame of the evaluated clip.
+  - Wrong photo (control): a different fictional person (`auntW`, frame 56).
+- **Damage was synthetic:** downscale to 1/5, Gaussian blur σ1.0, bicubic upscale, saturation 0.25, contrast 0.8 / brightness 0.03 / gamma 1.1, chroma shift, temporal grain, H.264 CRF 36 (`data/eval-pd/strong/evaluate_strong.py`).
+- **Measurement:** SFace cosine to the clean clip, 13 sampled frames, seeds 42 and 7. Source: `data/eval-pd/synth/run_W42/summary.csv` and `run_W7/summary.csv` (local, not committed).
 
-| Clip | Damaged vs. original | No photo | Correct photo | Other person's photo | Correct − no photo | Correct − other photo | Frames where correct photo wins (vs. no photo / vs. other) |
-|---|---|---|---|---|---|---|---|
-| Obama | 0.680 | 0.728 | 0.861 | 0.694 | +0.133 | +0.167 | 13/13, 13/13 |
-| Biden | 0.692 | 0.652 | 0.762 | 0.654 | +0.111 | +0.108 | 13/13, 13/13 |
-| Michelle Obama | 0.608 | 0.773 | 0.804 | 0.783 | +0.031 | +0.020 | 12/13, 12/13 |
+| Seed | Without photo | Correct photo | Wrong photo | Correct − without | Correct − wrong |
+|---|---|---|---|---|---|
+| 42 | 0.583 | 0.687 | 0.478 | **+0.103** | **+0.209** |
+| 7 | 0.560 | 0.647 | 0.383 | **+0.087** | **+0.264** |
 
-- **Mild damage gave small, mixed results.** We also ran the repository's default mild damage, where the damaged input was already about 0.87-0.89 similar to the original. There the photo's effect was small and mixed: at 240 frames, correct − no photo was +0.014 (Obama), +0.005 (Biden) and −0.003 (Michelle Obama).
-- **Wording to use:** "In our small test, adding a real photo helped the restored face look more like the real person, most clearly when the damage was heavy."
-- **Wording not to use:**
-  - "keeps the face true"
-  - "recovers the original face"
-  - "unlimited length"
-  - any claim about what other video products refuse to process
-  - "first" reference-based restoration (IP-FVR and RG-FVR already exist)
+- **Coverage caveat:** a face was detected in only **7 of 13** sampled frames common to all three runs. Scores are means over those 7 frames. Coverage is below the harness's 80% bar, so its status is **"inconclusive"**.
+- **Other fictional people:** father and aunt showed no clear gain (father −0.029 / −0.038; aunt +0.000 / +0.042, with correct = wrong at seed 7). The demo says so on the results slide.
 
-### Visible side effects
+### Public-domain benchmark (text only in the demo)
 
-Say these out loud in the demo instead of cropping them out:
+From [TECHNICAL_REPORT.md](TECHNICAL_REPORT.md) §4: 3 public-domain subjects, 13 sampled frames each, strong synthetic damage. Mean correct − no photo was **+0.092 (seed 42)** and **+0.064 (seed 7)**, and the correct photo scored higher than no photo in 38 of 39 frames for each seed. With the repository's mild damage the effect was small and mixed.
 
-- **The background can change.** In the Biden pair, the flag behind him is visible without the photo, but a plain dark wall appears with the photo. The reference canvas is a gray frame, and the model can also restyle areas outside the face.
-- **The photo version can look stylized.** In the Biden pair, the with-photo face is sharper and more contrasty, and the eye color is more saturated than in the original.
-- **A similarity score is not proof.** It is not proof that the original appearance was recovered. The restored face can also drift toward the reference photo itself.
+### Wording
 
-## Finished clips
+- **Use:** "In our small test, adding a separate photo helped the restored face stay closer to the person, most clearly when the damage was heavy."
+- **Do not use:** "keeps the face true", "recovers the original face", "unlimited length", claims about what other products refuse, or "first" reference-based restoration (IP-FVR and RG-FVR already exist).
 
-These are local files and are not committed. They were generated from `data/eval-pd/run-97-strong/pd-biden/` by `data/eval-pd/demo/make_demo.py`.
+### Visible side effects (shown, not cropped)
 
-| Clip | File | Length | Content |
+- It is generative: background, colors and fine detail can change in both versions.
+- A higher similarity score is not proof that the original face was recovered. The face can also drift toward the reference photo itself.
+- Scope: one person, short clips, fixed framing.
+
+## Shot list (draft v3, 107.2 s)
+
+All text is on screen. There is no voiceover track yet; the VO column is optional narration for a later pass.
+
+| Time | Segment | On screen | Optional VO |
 |---|---|---|---|
-| Wipe | `data/eval-pd/demo/biden_wipe.mp4` | 12.1 s (97 frames × 3 loops), 1920×1080, 24 fps | Face-zoomed. Left "Without photo", right "With real photo". A divider sweeps across. Caption: "Same damaged VHS-style input · same seed · only the reference photo differs". |
-| 4-panel | `data/eval-pd/demo/biden_4panel.mp4` | 8.1 s (97 frames × 2 loops), 1920×1080, 24 fps | Damaged input / Without photo / With real photo / Original. Title: "FaceTrue Restore: a reference photo helps the face look more like the real person". Subtitle: "Synthetic VHS-style damage on public-domain footage · LTX-2.5 + Restore IC-LoRA · same seed · small test (3 clips, 1 seed)". |
+| 0:00-0:12 | Hook | `FaceTrue_wipe_synthetic.mp4`: face-zoomed wipe, "Without photo" (left) vs "With photo" (right). Top line: "Same damaged clip, restored twice. The only difference: one photo." Fictional caption. | "Same damaged video, restored twice. Same model, same seed. The only difference: on the right, I gave it one photo of her." |
+| 0:12-0:18 | Title | "FaceTrue Restore. Anchor an old-video restoration to one photo, then see exactly what that photo changed." Model line. | — |
+| 0:18-0:28 | Problem | Damaged clip (looping) next to the separate reference photo, with the damage recipe and "not a frame from the clip". Fictional caption. | "A restoration model has to invent the missing detail. Without a reference, it guesses whose face it is." |
+| 0:28-0:33 | Web UI | Landing page of the app before any footage is loaded (first 2.9 s of `FaceTrue_UI_1_upload.mp4`, then a freeze). Caption: "1 Prepare video · 2 Face and photo · 3 Restore and compare". | "You start in the local web app." |
+| 0:33-0:43 | Photo → canvas | Three panels: click the face in frame 0 of the damaged clip → separate photo → gray reference canvas with the face at the clicked position (`correct_canvas.png`). Fictional caption. | "Click the face, add a photo. The app places that face on a gray canvas at the same spot and feeds it in as an IC-LoRA guide." |
+| 0:43-0:51 | 3-way comparison | `FaceTrue_4panel_synthetic.mp4`: Damaged input / Without photo / With photo / Original, same seed. Fictional caption. | "Same input, same seed. Without the photo the face drifts to a different-looking woman. With it, her features stay closer." |
+| 0:51-0:59 | Wrong-photo control | Damaged input / Correct photo / Wrong person's photo / Original, with the two reference faces under their panels. Fictional caption. | "And with someone else's photo, the face moves away from her. The photo really steers identity." |
+| 0:59-1:17 | Results | Grandma table (seeds 42 and 7), the 7/13 coverage note and "inconclusive" status, "father and aunt showed no clear gain", then the public-domain benchmark box as text only. | "On this clip, the correct photo raised similarity by 0.10 and 0.09, and beat the wrong photo by 0.21 and 0.26. A face was found in only 7 of 13 frames, so this is a small, inconclusive test. On three public-domain clips, the mean gain was 0.092 and 0.064." |
+| 1:17-1:27 | Limits | Freeze frame (frame 60) without vs with photo, plus three limits bullets. Fictional caption. | "It's generative. Details change, and a similarity score is not proof. That's why the app always shows the comparison." |
+| 1:27-1:39 | How it works | Web app (browser, Mac) → FastAPI → comfy-sdk + local proxy → ComfyUI on the RTX 5090 PC → LTX-2.5 22B + Restore IC-LoRA. Bullets: reference canvas, two renders with the same seed, 97-frame windows with 17-frame overlap, 8 steps · 1280×736 · about 72 s per window. Badge: "Open weights only". | "LTX-2.5 22B with the Restore IC-LoRA, in ComfyUI on one RTX 5090. Open weights only: no closed APIs, no partner nodes." |
+| 1:39-1:47 | End card | "FaceTrue Restore", github.com/junjunjunbong/facetrue-restore, "Models: LTX-2.5 22B (distilled) + LTX-2.5 Restore IC-LoRA · open weights", #OpenSourceHiggsfield, scope line, fictional-person note. | "FaceTrue Restore: see what one photo changes. #OpenSourceHiggsfield" |
 
-The video loops back at 4.04 s and 8.08 s, which causes a small jump. Cut on the loop point or play only one pass when time is short.
+### Notes
 
-## Shot list (118 s)
+- **Render time:** the app's render records show about 72 s per 97-frame window (8 steps, 1280×736) on one RTX 5090.
+- **Window chaining:** the grandma clips are a single 97-frame window. Do not present them as a chained clip.
+- **Web UI footage:** the existing screen recordings (`FaceTrue_UI_*.mp4`) show a real public figure after the first 3 s, so v3 uses only the empty landing page. A re-recording of the face-click, photo-drop and 3-way player steps with the fictional grandma clip would make this segment stronger.
+- **Builder:** `/workspace/facetrue-demo/v3build/build.py` on the agent box (fonts: Source Sans Pro). Inputs are the grandma run files in `data/eval-pd/synth/run_W42/syn-grandmaW/` and the two synthetic demo clips.
 
-VO = voiceover. On-screen text is in quotes. Times are cumulative.
+## To do before publishing
 
-| Time | On screen | VO / caption (English) |
-|---|---|---|
-| **0:00-0:12** Hook | **Wipe clip** at full screen, first pass, with the divider sweeping. Small corner caption: "Synthetic VHS-style damage · public-domain footage". | "Same damaged video, restored twice on my own PC. Same model, same seed. The only difference: on the right, I gave it one real photo of the person." |
-| **0:12-0:24** Problem | **4-panel clip**: damaged / without photo / with real photo / original. Hold on it once it reaches the "Original" panel. | "Old tape loses the face. A restoration model fills in the missing detail, but it has to guess whose face it is. FaceTrue Restore lets you hand it a separate photo, and shows you exactly what that photo changed." |
-| **0:24-0:36** Upload | Web UI screen capture: upload the clip, tick "synthetic test clip", show the first frame. | "You start with a short clip of one person. The app can deinterlace it and normalizes size and frame rate." |
-| **0:36-0:50** Face + photo | Click the face in the first frame. Drop the separate portrait. Show the crop preview, then the gray reference canvas with the face placed at the clicked position. | "Click the face, drop in a separate photo, not a frame from the video. The app places that face on a reference canvas, at the same spot as the face in the video." |
-| **0:50-1:04** Run + 3-way player | Start the job (sped up, with an on-screen "sped up" label). Then the synchronized player: original / without photo / with photo. Scrub, and pause on one frame. | "It renders the clip twice, with and without the photo, using the same seed. All three views stay on the same frame, so you can compare them directly." Caption: "Sped up. Real render: about 72 s per 97-frame window on one RTX 5090." |
-| **1:04-1:24** Results | Results table card with the three clips and the correct − no photo / correct − other photo columns (numbers from the table above). Note under the card: "3 clips · 1 seed · synthetic damage". | "We tested it on three public-domain clips with heavy synthetic damage, against a no-photo run and a wrong-person photo. With the right photo, the face matched the real person more closely in all three, clearly for two of them and only slightly for the third. With mild damage, the effect was small. This is a small test, not a benchmark." |
-| **1:24-1:34** Honest limits | Pause the wipe on a frame where the background differs (the flag vs. the dark wall). | "It's generative. The background and color can change too, and similarity is not proof the original was recovered. That's why the app always shows the comparison." |
-| **1:34-1:50** How it works | Simple diagram: Mac (web app + FastAPI) → comfy-sdk → local proxy → ComfyUI on the RTX 5090 PC → LTX-2.5 22B + Restore IC-LoRA. Then: reference canvas, plus 97-frame windows with 17-frame overlap. Badge: "Open weights only". | "Under the hood: LTX-2.5 22B with the Restore IC-LoRA, running in ComfyUI on a single RTX 5090. The photo enters as a reference canvas. Longer clips are restored in 97-frame windows with a 17-frame overlap. Open weights only: no closed APIs, no partner nodes." |
-| **1:50-1:58** End card | "FaceTrue Restore". github.com/junjunjunbong/facetrue-restore. #OpenSourceHiggsfield. "One person · short clips · fixed framing". | "FaceTrue Restore: see what one photo changes. Link below. #OpenSourceHiggsfield" |
-
-### Notes on timing and wording
-
-- **Render time:** the app's render records show about 72 s per 97-frame window (8 steps, 1280×736). The 240-frame preflight (both arms, 3 windows each, plus export) took 482 s, about 8 min. In the strong-damage pilot, 9 renders of 97 frames took 662 s in total. Peak GPU memory was about 31.9-32.1 GB across the pilot runs, from `nvidia-smi` sampling for the whole GPU, with ComfyUI running in `--lowvram`. GPU-PC system RAM was not measured.
-- **Window chaining:** the finished Biden clips are a single 97-frame window. The separate 240-frame (10 s) pilot ran through the 97/17 window chaining. Do not show a chained clip as if it were the Biden demo.
-- **If a family-video example is added:** it must be public domain, or the project owner's own footage used with the consent of everyone shown. Do not use private family media without consent. Do not upload private media to outside services.
-
-## Shots still to record
-
-Checklist for the project owner:
-
-- [x] **Re-render the 4-panel clip** with the toned-down title "a reference photo helps the face look more like the real person" (done 2026-10-29).
-- [ ] **Web UI, upload (0:24-0:36):** upload `biden-hq`-derived degraded input or another public-domain clip. Tick the synthetic-test checkbox, and keep the "SYNTHETICALLY DEGRADED TEST CLIP" label visible.
-- [ ] **Web UI, face click and photo drop (0:36-0:50):** click the face, drop `biden-photo.jpg`, show the crop preview and the gray reference canvas.
-- [ ] **Web UI, run and 3-way player (0:50-1:04):** a real `FACETRUE_MODE=comfy` run, not mock output. Sped-up footage needs a "sped up" label. Scrub the synchronized player and pause on one frame.
-- [ ] **Results card (1:04-1:24):** a simple slide built from the table above, including the "3 clips · 1 seed · synthetic damage" note.
-- [ ] **Limits freeze frame (1:24-1:34):** a wipe frame where the background difference is visible.
-- [ ] **How-it-works diagram (1:34-1:50):** a static slide.
-- [ ] **End card (1:50-1:58):** use the repo URL only after the repository is public.
-- [ ] **Before recording:** close unrelated windows, and check that no `.env`, tokens or private files are visible.
-- [ ] **Final duration check:** keep the export at 120 s or less. Check it with:
+- [x] Remove all real-person footage and stills from the demo (v3).
+- [ ] Optional: re-record the web UI steps with the fictional grandma clip.
+- [ ] Optional: add a voiceover track (AAC) using the VO column.
+- [ ] Use the repo URL on the end card only after the repository is public.
+- [ ] Before recording anything new: close unrelated windows; no `.env`, tokens or private files visible.
+- [ ] Final duration check (≤ 120 s):
 
 ```bash
-ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 data/demo/final-demo.mp4
+ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 FaceTrue_demo_2min_draft_v3.mp4
 ```
 
-Mock mode is fine for rehearsal, but its outputs are copies of the input and must not appear in the final video as restorations.
+## Benchmark sources (not shown in the demo)
 
-## Sources and licenses
-
-All footage and photos in the demo are US federal government works in the **public domain**, taken from Wikimedia Commons. These sources are recorded in `data/eval-pd/pilot-97.json`, which is local and not committed. Each clip was trimmed to 11 s and normalized to 1280×736 at 24 fps.
+These public-domain US federal government works were used only for the measurements in the technical report. They do not appear in the demo video.
 
 | Use | Source |
 |---|---|
@@ -106,17 +95,11 @@ All footage and photos in the demo are US federal government works in the **publ
 | Michelle Obama reference | [Michelle Obama 2013 official portrait](https://commons.wikimedia.org/wiki/File:Michelle_Obama_2013_official_portrait.jpg), Chuck Kennedy |
 | Michelle Obama control photo | [Kamala Harris Vice Presidential Portrait (cropped)](https://commons.wikimedia.org/wiki/File:Kamala_Harris_Vice_Presidential_Portrait_(cropped).jpg), Lawrence Jackson |
 
-**Rights and endorsement:**
-
-- The people shown are public figures, and the footage is used only to demonstrate restoration. The demo must not suggest that they endorse the project.
-- Public-domain status covers copyright only. Check each Commons file page again before publishing.
-- Models are listed in [MODELS.md](MODELS.md): LTX-2.x Community License for LTX-2.5, the Restore IC-LoRA and the Gemma 4 text encoder package. The evaluation-only models are YuNet (MIT) and SFace (Apache-2.0).
-
-The [Prelinger home-movie file](https://commons.wikimedia.org/wiki/File:Home_Movies_-_Western_U.S.,_New_Mexico,_Mexico,_California,_Colorado,_Utah.webm) remains a possible archival extra (see [samples/README.md](../samples/README.md)). There is no independent photo of the people in it, so it can only serve as a clearly labeled qualitative example, never as a correct-photo test.
+Models are listed in [MODELS.md](MODELS.md): LTX-2.x Community License for LTX-2.5, the Restore IC-LoRA and the Gemma 4 text encoder package. Evaluation-only models: YuNet (MIT) and SFace (Apache-2.0).
 
 ## Submission preparation
 
-The [official challenge page](https://comfy.org/open-source-higgsfield/) gives the deadline as October 30, 2026 at 09:00 PT, which is **October 31 at 01:00 KST**. The project's internal target is **October 30 at 22:00 KST**. Open Weights Only excludes partner nodes and closed APIs. The LTX VFX bonus requires LTX as the core video model.
+The [official challenge page](https://comfy.org/open-source-higgsfield/) gives the deadline as October 30, 2026 at 09:00 PT (**October 31 at 01:00 KST**). The internal target is **October 30 at 22:00 KST**. Open Weights Only excludes partner nodes and closed APIs. The LTX VFX bonus requires LTX as the core video model.
 
 The project owner performs these steps personally. This document does not publish a post, upload media, submit the form or change repository visibility.
 

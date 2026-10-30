@@ -14,7 +14,7 @@ We measured the photo's effect on three public-domain U.S. government clips (Bar
 - **Seed 7:** the gain was +0.064, again 38 of 39 frames.
 - **Mild damage:** the effect was close to zero.
 
-Three rounds of tuning (22 configurations) found nothing reliably better than the baseline. The one "oracle" run, which is not deployable, shows a ceiling of +0.196. That run used the clean ground-truth first frame as a keyframe.
+Five rounds of tuning (about 40 configurations, including an attention mask, photo-only guidance and a Qwen-Image-Edit keyframe) found nothing reliably better than the baseline. The one "oracle" run, which is not deployable, shows a ceiling of +0.196. That run used the clean ground-truth first frame as a keyframe.
 
 ## 2. Method
 
@@ -141,6 +141,8 @@ All ablations use the strong-damage set, seed 42, and the same metric. The basel
 
 ![Mean correct − no-photo gain for every ablation vs. the +0.092 baseline](img/report_ablations.png)
 
+The chart covers rounds 1–3. Rounds 4 and 5 are in the tables below.
+
 ### 6.1 Round 1: guidance strength, canvas, and sampling (11 configurations)
 
 | Config | Change | c−n | c−w | Frames c > n | Verdict |
@@ -208,13 +210,58 @@ Why it failed:
 - **The photo gets overridden:** because the keyframe fixes identity for the whole clip, c−w falls to about 0.
 - **Decision:** the code is kept on the side branch `tune/keyframe-restorer` and is not merged. These restorers are not part of the shipped pipeline.
 
-### 6.4 Summary
+### 6.4 Round 4: more photo guides, a second photo, and identity-conditioned keyframes
+
+Seed 42 only, because nothing beat the baseline at seed 42. The no-photo arm is reused from the baseline run.
+
+| Config | Change | c−n | c−w | Verdict |
+|---|---|---|---|---|
+| baseline | — | +0.092 | +0.098 | — |
+| mp_0_48 | Extra copies of the photo guide at frames 0 and 48 | +0.067 | +0.168 | Worse; Michelle −0.020 |
+| mp_48 | Extra copy at frame 48 | +0.084 | +0.126 | Worse |
+| mp_24_48_72 | Extra copies at frames 24, 48 and 72 | +0.092 | +0.147 | Ties the baseline (best multi-position) |
+| mp_0_48 @0.6 | Extras at frames 0 and 48, strength 0.6 | +0.061 | +0.170 | Worse |
+| photo2 @−1 | A second public-domain photo as an extra guide | +0.074 | +0.056 | Worse; wrong ≥ correct for two people |
+| photo2 @48 | Second photo at frame 48 | +0.090 | +0.116 | Ties the baseline |
+| photo2 @48 + photo1 @24,72 | Combined | +0.094 | +0.163 | +0.002 over baseline, within noise |
+| IP-Adapter plus-face keyframe | SDXL img2img frame 0 conditioned on the photo | — | — | Failed the keyframe gate: no better than LTX's own frame 0 |
+| InstantID keyframe | InstantID img2img frame 0 as a keyframe | +0.044 | +0.176 | Worse; also needs the non-commercial antelopev2 face model |
+
+The best deployable result was +0.094, against a bar of +0.12. Michelle stayed at +0.02 to +0.035 in every variant. Round 4 code is on the side branch `tune/round4` and is not merged.
+
+### 6.5 Round 5: research-guided experiments
+
+These experiments came from the [research notes](RESEARCH_NOTES.md) and followed the [improvement plan](IMPROVEMENT_PLAN.md). Screening used two people (Obama and Michelle) at seed 42, so the baseline mean c−n here is **+0.082**, not the three-person +0.092. Runs that did not change the no-photo path reused the baseline's no-photo arm. A single number in a person's column is the correct arm. "–" means the value was not computed for that run.
+
+| Run | Obama correct / wrong / none | Michelle correct / wrong / none | Mean c−n | c−w Obama / Michelle | Face LPIPS Obama / Michelle | Flicker Obama / Michelle |
+|---|---|---|---|---|---|---|
+| baseline | 0.8607 / 0.6937 / 0.7277 | 0.8038 / 0.7834 / 0.7728 | +0.082 | +0.167 / +0.020 | 0.1586 / 0.2267 | 2.069 / 1.210 |
+| A1 attention mask (advanced guide) | 0.8629 | 0.8068 | – | – | – | – |
+| A2 attention mask (grow 1.5, feather 0.1) | 0.8618 | 0.8105 | – | +0.155 / +0.020 | 0.1604 / 0.2268 | 2.042 / 1.193 |
+| C reference-only guidance, α = 0.25 | 0.8609 | 0.7885 | – | +0.195 / +0.045 | 0.1606 / 0.2304 | 2.104 / 1.266 |
+| photo-only attention × 1.25 | 0.8525 | 0.8171 | – | +0.159 / +0.050 | 0.1590 / 0.2323 | 2.034 / 1.177 |
+| photo-only attention × 1.5 | 0.8486 | 0.8121 | – | – | 0.1586 / 0.2288 | 1.997 / 1.167 |
+| B Qwen-Image-Edit keyframe, strength 0.8 | 0.8457 / 0.6772 / 0.8073 | 0.8005 / 0.7747 / 0.7325 | +0.053 | +0.168 / +0.026 | 0.1491 / 0.2290 | 1.762 / 1.012 |
+| B Qwen-Image-Edit keyframe, strength 0.6 | 0.8461 / 0.6844 / 0.8208 | 0.8021 / 0.7899 / 0.7705 | +0.028 | +0.162 / +0.012 | 0.1445 / 0.2342 | 1.784 / 1.051 |
+
+Notes:
+
+- **Flicker** is the motion-compensated temporal error on frames 81–96 (lower is steadier). The clean clip scores 1.223 (Obama) and 0.753 (Michelle). **Face LPIPS** is measured against the clean clip.
+- **A (attention mask):** the mask was confirmed to take effect, but the correct arm rose only +0.001 to +0.007.
+- **C and attention scaling:** C lowered Michelle's correct arm. Attention × 1.25 moved the two-person mean by about +0.0025 and × 1.5 by about −0.002: Michelle went up and Obama went down.
+- **B (Qwen-Image-Edit-2511 keyframe, Apache-2.0):** at strength 0.8 the clip pops at frame 0 (Obama correct 0.69 at frame 0 vs. 0.82 for the baseline) and recovers by frame 8. At 0.6 the pop is gone, but the correct arm is still slightly below the baseline. The Qwen keyframes match the clean frame 0 only weakly: Obama 0.741 for both the correct and no-photo keyframes, Michelle 0.580 correct vs. 0.633 no-photo. Qwen also lifts the no-photo arm (Obama none +0.08 to +0.09), which shrinks the gain from the photo. B improved flicker and LPIPS, but not identity.
+- **Michelle diagnosis (no GPU):** her reference photo matches the clean clip at SFace 0.622 (range 0.583–0.655), against 0.794 for Obama and 0.673 for Biden. Her pose range is narrow, and her gain does not correlate with yaw (−0.03), photo-to-frame similarity (0.02) or brightness (−0.28). It is not a pose or lighting issue. The photo is simply a weak identity match, while the no-photo result is already 0.773, so the photo has little to add.
+- **Verdict: no deployable gain.** Nothing passed the acceptance bar at seed 42, so nothing was expanded to seed 7. The baseline is kept. Round 5 code is on the side branch `tune/round5` and is not merged.
+
+### 6.6 Summary
 
 | Round | Configs | Best deployable c−n | Adopted |
 |---|---|---|---|
 | 1 | 11 | +0.099 (expand14) | No; within seed noise |
 | 2 | 8 (incl. oracle) | +0.094 (align13) | No |
 | 3 | 6 runs (3 configs × 2 seeds) | +0.002 (GFPGAN, seed 42) | No |
+| 4 | 9 | +0.094 (photo2 @48 + photo1 @24,72) | No; within noise |
+| 5 | 7 (two people, seed 42) | +0.0025 over its +0.082 baseline (attention × 1.25) | No |
 | Oracle ceiling | 1 | +0.196 (not deployable) | — |
 
 The shipped configuration is the baseline. The gap to the oracle suggests that a more faithful first frame is the main remaining lever.
@@ -291,7 +338,7 @@ The shipped pipeline uses open weights only. It makes no hosted or partner API c
 | YuNet 2023mar | Face detection (evaluation only) | MIT |
 | SFace 2021dec | Face embedding (evaluation only) | Apache-2.0; training-data provenance unverified |
 
-GFPGAN, CodeFormer and RestorerID were used only in the negative experiments in section 6. They are not part of the shipped app. CodeFormer's license is non-commercial. App code is MIT. Full terms, file names and hashes are in [MODELS.md](MODELS.md) and [EVALUATION.md](EVALUATION.md).
+GFPGAN, CodeFormer, RestorerID, IP-Adapter, InstantID and Qwen-Image-Edit were used only in the negative experiments in section 6. They are not part of the shipped app. CodeFormer's license is non-commercial. App code is MIT. Full terms, file names and hashes are in [MODELS.md](MODELS.md) and [EVALUATION.md](EVALUATION.md).
 
 ## Appendix: where each number comes from
 
@@ -307,4 +354,6 @@ The `data/` paths are local evaluation records, gitignored because they contain 
 | 6.1 | `data/eval-pd/tune/PROGRESS.md`, `NOTES.md` |
 | 6.2 | `data/eval-pd/tune2/PROGRESS.md` |
 | 6.3 | `data/eval-pd/tune3/summary.md`, `PROGRESS.md` |
+| 6.4 | `data/eval-pd/tune4/PROGRESS.md`, `kfscores4.json` |
+| 6.5 | `data/eval-pd/tune5/PROGRESS.md`, `diag/michelle_diag.json`; summary in `experiments/tune5_round5/README.md` on branch `tune/round5` (commit 97852d9) |
 | 9 | [MODELS.md](MODELS.md), [EVALUATION.md](EVALUATION.md) |

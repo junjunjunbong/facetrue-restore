@@ -4,7 +4,9 @@
 
 The goal is to make the photo's effect inspectable. A reference photo does not guarantee that a generated face is more accurate. Colors and fine details are reconstructed by a generative model.
 
-> **Comparison GIF placeholder:** add a short, labeled excerpt from the actual GPU run described in [Pilot results](#pilot-results-small-test).
+![Wipe comparison of the same damaged clip restored without and with a reference photo](docs/img/readme_wipe_synthetic.gif)
+
+*Fictional person generated with open models. Same damaged input and seed; only the reference photo differs.*
 
 Built for the [Comfy Open Source Higgsfield challenge](https://comfy.org/open-source-higgsfield/), targeting Open Weights Only and the LTX VFX bonus. The app workflow uses local models and excludes partner/API generation nodes. [Workflow provenance](workflows/PROVENANCE.md).
 

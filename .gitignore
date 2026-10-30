@@ -39,3 +39,5 @@ node_modules/
 
 # Report charts (small matplotlib bar charts, no faces)
 !docs/img/report_*.png
+# README comparison GIF (fictional person, no real people)
+!docs/img/readme_wipe_synthetic.gif

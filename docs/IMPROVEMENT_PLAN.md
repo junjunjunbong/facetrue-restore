@@ -33,3 +33,17 @@ For any pair of changes that both pass screening, run the 2×2 interaction check
 - Switching to a new video backbone (Wan family and similar).
 - Training a single-photo LoRA.
 - Adopting non-commercial models: InstantRestore, ReF-LDM, CodeFormer, antelopev2.
+
+## Outcome (10/30)
+
+No experiment passed the acceptance bar, so the shipped baseline is unchanged. Full numbers are in [technical report, section 6.5](TECHNICAL_REPORT.md#65-round-5-research-guided-experiments).
+
+| Step | Verdict |
+|---|---|
+| M | Not a pose or lighting issue. Michelle's photo is the weakest identity match to her clip (SFace 0.622, vs. 0.794 Obama and 0.673 Biden), and the no-photo result is already 0.773. |
+| A | The attention mask works as intended but adds only +0.001 to +0.007 to the correct arm. Stopped. |
+| A follow-up | Photo-only attention × 1.25 / × 1.5: Michelle up, Obama down, mean change about +0.0025 / −0.002. Stopped. |
+| B | Qwen-Image-Edit keyframe: strength 0.8 pops at frame 0 (c−n +0.053); strength 0.6 has no pop but c−n is +0.028. The keyframes match the clean frame 0 only weakly and also lift the no-photo arm. Flicker and LPIPS improved, identity did not. Rejected. |
+| C | Reference-only guidance α = 0.25 raises separation from the wrong photo, but lowers Michelle's correct arm (0.7885 vs. 0.8038). Rejected. |
+| Decision | Keep the baseline. Nothing was expanded to seed 7 or to the 2×2 interaction check. Experiment code stays on the side branch `tune/round5`. |
+

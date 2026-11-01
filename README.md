@@ -8,6 +8,8 @@
 
 FaceTrue Restore is a local, open-weights video restoration prototype. Add a short clip and a separate photo of the person, then compare the original with two restorations: one made without the photo and one guided by it.
 
+> **Live demo for judges:** https://room-consecutive-sec-composed.trycloudflare.com (username `judge`; the password is in the submission form). This address replaced the one in the form on 2026-11-01 after a PC restart. It runs on one home RTX 5090, one job at a time, and takes a few minutes per 10-second clip.
+
 [See the comparison](#see-it-in-action) · [Quick start](#quick-start) · [GPU setup](#run-with-a-gpu) · [Pilot results](#pilot-results-small-test) · [Documentation](#documentation)
 
 > **Prototype status:** The app and comparison workflow work in mock mode without a GPU. Real restoration requires the separately configured ComfyUI backend. Generated faces, colors, and details are not guaranteed to match the original.
